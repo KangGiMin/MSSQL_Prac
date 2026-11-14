@@ -1,0 +1,5 @@
+import { Building2,ShoppingBag,GraduationCap,Check,ArrowUpRight,Database } from 'lucide-react';
+const icons={company:Building2,store:ShoppingBag,campus:GraduationCap};
+export default function DatabaseCards({databases,selected,onSelect,disabled}) {
+ return <section className="database-section"><div className="section-heading"><h2><Database size={16}/>실습 데이터베이스 <span>03</span></h2><span>배우고 싶은 데이터로 시작해 보세요</span></div><div className="database-cards">{databases.map(db=>{const Icon=icons[db.id]||Database;return <button key={db.id} disabled={disabled} className={`database-card ${selected===db.id?'selected':''}`} onClick={()=>onSelect(db.id)} style={{'--card-accent':db.color}}><span className="database-icon"><Icon size={22}/></span><div><h3>{db.label}</h3><p>{db.subtitle}</p><span className="database-meta">{db.id==='campus'?'5':db.id==='store'?'6':'4'} tables <i/> {db.name.replace('QueryGround_','')}</span></div><span className="card-select">{selected===db.id?<Check size={14}/>:<ArrowUpRight size={17}/>}</span></button>;})}</div></section>;
+}
