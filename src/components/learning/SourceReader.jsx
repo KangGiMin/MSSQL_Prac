@@ -6,7 +6,7 @@ import {
   Search,
   FileText,
 } from "lucide-react";
-export default function SourceReader({ page, onPage }) {
+export default function SourceReader({ page, onPage, pageCount = 0 }) {
   const [pages, setPages] = useState([]),
     [error, setError] = useState(""),
     [search, setSearch] = useState(""),
@@ -19,6 +19,14 @@ export default function SourceReader({ page, onPage }) {
         return r.json();
       })
       .then((p) => {
+        if (
+          !Array.isArray(p) ||
+          p.some(
+            (item, index) =>
+              item.page !== index + 1 || typeof item.text !== "string",
+          )
+        )
+          throw new Error("원본 페이지 정보의 형식이 올바르지 않습니다.");
         if (live) setPages(p);
       })
       .catch((e) => {
@@ -28,6 +36,10 @@ export default function SourceReader({ page, onPage }) {
       live = false;
     };
   }, []);
+  const total = pages.length || pageCount;
+  useEffect(() => {
+    if (total && page > total) onPage(total);
+  }, [total, page, onPage]);
   const found = search.trim()
     ? pages.filter((p) =>
         p.text
@@ -41,8 +53,8 @@ export default function SourceReader({ page, onPage }) {
       <div className="source-toolbar">
         <div>
           <FileText size={17} />
-          <strong>SQL 정리 · 기출 정답 원본</strong>
-          <span>90 pages</span>
+          <strong>원본 PDF</strong>
+          <span>{total || "…"}쪽</span>
         </div>
         <a
           href={`/materials/sql-reference.pdf#page=${page}`}
@@ -57,7 +69,7 @@ export default function SourceReader({ page, onPage }) {
           <Search size={15} />
           <input
             aria-label="PDF 전체 내용 검색"
-            placeholder="90쪽 전체에서 검색"
+            placeholder={`${total || ""}쪽 전체에서 검색`}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -77,16 +89,18 @@ export default function SourceReader({ page, onPage }) {
             aria-label="PDF 페이지"
             type="number"
             min="1"
-            max="90"
+            max={total || 1}
             value={page}
             onChange={(e) =>
-              onPage(Math.min(90, Math.max(1, Number(e.target.value) || 1)))
+              onPage(
+                Math.min(total || 1, Math.max(1, Number(e.target.value) || 1)),
+              )
             }
           />
-          <span>/ 90</span>
+          <span>/ {total || "…"}</span>
           <button
             aria-label="다음 페이지"
-            disabled={page >= 90}
+            disabled={!total || page >= total}
             onClick={() => onPage(page + 1)}
           >
             <ChevronRight size={17} />
@@ -113,7 +127,14 @@ export default function SourceReader({ page, onPage }) {
       {textMode ? (
         <div className="source-text">
           <span>원본 {page}쪽 · 원본 표현을 유지한 추출 텍스트</span>
-          <pre>{pages[page - 1]?.text || "내용을 불러오는 중입니다."}</pre>
+          <pre>
+            {pages[page - 1]?.text ||
+              (pages.length
+                ? "이 페이지에는 추출 가능한 텍스트가 없습니다. PDF로 확인해 주세요."
+                : error
+                  ? "원본 텍스트를 불러오지 못했습니다."
+                  : "내용을 불러오는 중입니다.")}
+          </pre>
         </div>
       ) : (
         <iframe

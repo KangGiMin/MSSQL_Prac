@@ -4,12 +4,50 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#101116" />
-    <meta name="description" content="실제 Microsoft SQL Server와 함께하는 나만의 SQL 실습 공간. PDF 개념과 기출 문제를 읽고, 직접 쿼리를 실행해 보세요." />
+    <meta
+      name="description"
+      content="실제 Microsoft SQL Server와 함께하는 나만의 SQL 실습 공간. PDF 개념과 기출 문제를 읽고, 직접 쿼리를 실행해 보세요."
+    />
     <title>QueryGround · 나만의 SQL 실습실</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main
+        style="
+          max-width: 680px;
+          margin: 12vh auto;
+          padding: 28px;
+          font: 16px/1.8 system-ui;
+          color: #e9e9ee;
+          background: #171920;
+          border-radius: 12px;
+        "
+      >
+        <h1>QueryGround 실습실을 불러오는 중입니다.</h1>
+        <p>
+          이 화면이 계속 보이면 프로젝트 터미널에서
+          <code>npm.cmd run dev</code>를 실행하고 터미널에 표시된 주소로
+          접속하세요.
+        </p>
+        <p>
+          Live Server의 5500번 주소와 HTML 파일 직접 열기는 지원하지 않습니다.
+        </p>
+        <a href="http://127.0.0.1:5173/" style="color: #bda5ff"
+          >기본 실습실 주소로 열기</a
+        ><noscript
+          ><p>
+            실습실을 사용하려면 브라우저에서 JavaScript를 허용해 주세요.
+          </p></noscript
+        >
+      </main>
+    </div>
+    <style>
+      body {
+        margin: 0;
+        background: #101116;
+      }
+    </style>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

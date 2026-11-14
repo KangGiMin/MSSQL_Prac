@@ -1,6 +1,11 @@
-import { useState,useEffect } from 'react';
-export function useLocalStorage(key,initial) {
-  const [value,setValue]=useState(()=>{try{const saved=JSON.parse(localStorage.getItem(key));return saved===null?initial:saved;}catch{return initial;}});
-  useEffect(()=>{try{localStorage.setItem(key,JSON.stringify(value));}catch{/* Private browsing or storage quota: keep working in memory. */}},[key,value]);
-  return [value,setValue];
+import { useMemo, useSyncExternalStore } from "react";
+import { getPersistentStore } from "../lib/storage";
+export function useLocalStorage(key, initial) {
+  const store = useMemo(() => getPersistentStore(key, initial), [key]);
+  const snapshot = useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    store.getSnapshot,
+  );
+  return [snapshot.value, store.update, { ...snapshot, retry: store.retry }];
 }
