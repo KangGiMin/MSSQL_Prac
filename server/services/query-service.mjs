@@ -17,7 +17,10 @@ export async function exclusive(database, operation) {
   let lock,
     acquiredLock = false;
   try {
-    lock = await connect("master", { admin: true, keepAlive: true });
+    lock = await connect(config.platform === "azure" ? database : "master", {
+      admin: true,
+      keepAlive: true,
+    });
     const acquired = await lock
       .request()
       .input("resource", `QueryGround:${database}`)

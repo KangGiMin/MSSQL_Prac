@@ -3,7 +3,11 @@ import CodeMirror from "@uiw/react-codemirror";
 import { sql, MSSQL } from "@codemirror/lang-sql";
 import { EditorView, keymap } from "@codemirror/view";
 import { Prec } from "@codemirror/state";
-import { oneDark } from "@codemirror/theme-one-dark";
+import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import {
+  oneDarkTheme,
+  oneDarkHighlightStyle,
+} from "@codemirror/theme-one-dark";
 import {
   Play,
   Square,
@@ -12,6 +16,19 @@ import {
   Code2,
   CornerDownLeft,
 } from "lucide-react";
+
+const sqlBlueTheme = [
+  oneDarkTheme,
+  syntaxHighlighting(
+    HighlightStyle.define(
+      oneDarkHighlightStyle.specs.map((rule) =>
+        rule.color === "#c678dd"
+          ? { ...rule, color: "var(--accent-text)" }
+          : rule,
+      ),
+    ),
+  ),
+];
 export default function QueryEditor({
   value,
   onChange,
@@ -82,6 +99,7 @@ export default function QueryEditor({
           color: "#505563",
         },
         ".cm-content": { paddingTop: "20px" },
+        ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--accent)" },
         ".cm-activeLine": { backgroundColor: "#ffffff03" },
         ".cm-activeLineGutter": { backgroundColor: "transparent" },
       }),
@@ -166,7 +184,7 @@ export default function QueryEditor({
         value={value}
         onChange={onChange}
         height="260px"
-        theme={oneDark}
+        theme={sqlBlueTheme}
         extensions={extensions}
         editable={!running && !resetting}
         basicSetup={{

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "serverName": {
+      "type": "string",
+      "metadata": {
+        "description": "Existing Azure SQL logical server in this resource group."
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Region of that existing logical server."
+      }
+    }
+  },
+  "variables": {
+    "databases": [
+      "QueryGround_Company",
+      "QueryGround_Store",
+      "QueryGround_Campus"
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Sql/servers/databases",
+      "apiVersion": "2023-08-01",
+      "name": "[format('{0}/{1}', parameters('serverName'), variables('databases')[copyIndex()])]",
+      "location": "[parameters('location')]",
+      "copy": {
+        "name": "practiceDatabases",
+        "count": 3,
+        "mode": "serial",
+        "batchSize": 1
+      },
+      "sku": {
+        "name": "GP_S_Gen5",
+        "tier": "GeneralPurpose",
+        "family": "Gen5",
+        "capacity": 2
+      },
+      "properties": {
+        "createMode": "Default",
+        "maxSizeBytes": 34359738368,
+        "requestedBackupStorageRedundancy": "Local",
+        "useFreeLimit": true,
+        "freeLimitExhaustionBehavior": "AutoPause"
+      }
+    }
+  ]
+}

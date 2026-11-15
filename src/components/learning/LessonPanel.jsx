@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { practiceLabel } from "../database/labels";
 import {
   BookOpen,
   ArrowUpRight,
@@ -64,16 +65,7 @@ export default function LessonPanel({
         <h3>{lesson.title}</h3>
         <p className="lesson-description">{lesson.explanation}</p>
         <div className="lesson-database">
-          실습 DB{" "}
-          <span>
-            {
-              {
-                company: "회사 · 인사",
-                store: "온라인 스토어",
-                campus: "캠퍼스",
-              }[lesson.database]
-            }
-          </span>
+          실습 DB <span>{practiceLabel(lesson.database)}</span>
         </div>
         {lesson.setup && (
           <div className="setup-note">
@@ -101,7 +93,7 @@ export default function LessonPanel({
         </div>
         <button className="answer-toggle" onClick={() => setAnswer((v) => !v)}>
           <Eye size={14} />
-          {answer ? "정답 접기" : "정답과 예시 SQL 보기"}
+          {answer ? "정답 접기" : "정답 보기"}
           <ChevronRight size={14} className={answer ? "rotated" : ""} />
         </button>
         {answer && (

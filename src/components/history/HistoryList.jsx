@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { practiceLabel } from "../database/labels";
 import {
   History,
   Bookmark,
@@ -107,12 +108,7 @@ export default function HistoryList({
                   ) : (
                     <CheckCircle2 size={15} />
                   )}{" "}
-                  {item.title ||
-                    {
-                      company: "회사 · 인사",
-                      store: "온라인 스토어",
-                      campus: "캠퍼스",
-                    }[item.database]}
+                  {item.title || practiceLabel(item.database)}
                 </span>
                 <time>{new Date(item.time).toLocaleString("ko-KR")}</time>
               </div>

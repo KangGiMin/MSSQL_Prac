@@ -5,7 +5,7 @@ export const databases = [
     label: "회사 · 인사",
     subtitle: "사원과 부서 데이터로 배우는 SQL",
     icon: "building",
-    color: "#bda5ff",
+    color: "#38bdf8",
     tables: ["EMP", "DEPT", "SALGRADE", "BONUS"],
   },
   {

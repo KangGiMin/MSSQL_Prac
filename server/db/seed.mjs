@@ -1,4 +1,6 @@
 import fs from "node:fs/promises";
+import { config } from "../config/env.mjs";
+import { prepareAzureDatabase } from "./azure.mjs";
 import { connect } from "./connection.mjs";
 import { databases, getDatabase } from "../config/databases.mjs";
 import { exclusive } from "../services/query-service.mjs";
@@ -54,51 +56,61 @@ EXEC sp_executesql @drop;`;
 export async function seedDatabase(id, { reset = false } = {}) {
   const db = getDatabase(id);
   return exclusive(db.name, async () => {
-    const master = await connect("master", { admin: true });
-    try {
-      const found = await master
-        .request()
-        .query(`SELECT name FROM sys.databases WHERE name=N'${db.name}';`);
-      if (found.recordset.length) {
-        const existing = await connect(db.name, { admin: true });
-        try {
-          const marker = await existing
-            .request()
-            .query(
-              "SELECT name,value FROM sys.extended_properties WHERE class=0 AND name IN ('QueryGroundOwned','QueryGroundReady')",
-            );
-          if (!marker.recordset.some((x) => x.name === "QueryGroundOwned"))
-            throw new Error(
-              `${db.name}: 앱 소유 표시가 없는 동명 DB입니다. 자동 변경을 중단합니다.`,
-            );
-          if (
-            !reset &&
-            marker.recordset.some((x) => x.name === "QueryGroundReady")
-          )
-            return { skipped: true, database: db.name };
-        } finally {
-          await existing.close();
-        }
-      } else {
-        await master.request().batch(`CREATE DATABASE [${db.name}];`);
-        const created = await connect(db.name, { admin: true });
-        try {
-          await created
-            .request()
-            .batch(
-              "EXEC sys.sp_addextendedproperty @name=N'QueryGroundOwned', @value=N'1';",
-            );
-        } finally {
-          await created.close();
-        }
+    if (config.platform === "azure") {
+      const existing = await connect(db.name, { admin: true });
+      try {
+        if (await prepareAzureDatabase(existing, db.name, { reset }))
+          return { skipped: true, database: db.name };
+      } finally {
+        await existing.close();
       }
-      await master
-        .request()
-        .batch(
-          `ALTER DATABASE [${db.name}] SET TRUSTWORTHY OFF; ALTER DATABASE [${db.name}] SET DB_CHAINING OFF;`,
-        );
-    } finally {
-      await master.close();
+    } else {
+      const master = await connect("master", { admin: true });
+      try {
+        const found = await master
+          .request()
+          .query(`SELECT name FROM sys.databases WHERE name=N'${db.name}';`);
+        if (found.recordset.length) {
+          const existing = await connect(db.name, { admin: true });
+          try {
+            const marker = await existing
+              .request()
+              .query(
+                "SELECT name,value FROM sys.extended_properties WHERE class=0 AND name IN ('QueryGroundOwned','QueryGroundReady')",
+              );
+            if (!marker.recordset.some((x) => x.name === "QueryGroundOwned"))
+              throw new Error(
+                `${db.name}: 앱 소유 표시가 없는 동명 DB입니다. 자동 변경을 중단합니다.`,
+              );
+            if (
+              !reset &&
+              marker.recordset.some((x) => x.name === "QueryGroundReady")
+            )
+              return { skipped: true, database: db.name };
+          } finally {
+            await existing.close();
+          }
+        } else {
+          await master.request().batch(`CREATE DATABASE [${db.name}];`);
+          const created = await connect(db.name, { admin: true });
+          try {
+            await created
+              .request()
+              .batch(
+                "EXEC sys.sp_addextendedproperty @name=N'QueryGroundOwned', @value=N'1';",
+              );
+          } finally {
+            await created.close();
+          }
+        }
+        await master
+          .request()
+          .batch(
+            `ALTER DATABASE [${db.name}] SET TRUSTWORTHY OFF; ALTER DATABASE [${db.name}] SET DB_CHAINING OFF;`,
+          );
+      } finally {
+        await master.close();
+      }
     }
     const pool = await connect(db.name, { admin: true });
     try {

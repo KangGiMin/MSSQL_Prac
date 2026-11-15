@@ -135,7 +135,9 @@ test("two tabs retain independent DB drafts and preserve conflicting drafts", as
       campus: "SELECT 111 AS first_tab;",
       company: "SELECT 222 AS second_tab;",
     });
-  await expect(page.locator(".database-card.selected")).toContainText("캠퍼스");
+  await expect(page.locator(".database-card.selected")).toContainText(
+    "학생 성적",
+  );
   await other.locator(".database-card").nth(2).click();
   await Promise.all([
     edit(page, "SELECT 333 AS conflict_a;"),
@@ -177,9 +179,9 @@ test("replacing SQL archives the draft and restoring it works", async ({
 test("selected database and lesson stay synchronized", async ({ page }) => {
   await open(page);
   await page.locator(".database-card").nth(0).click();
-  await expect(page.locator(".lesson-database")).toContainText("회사 · 인사");
+  await expect(page.locator(".lesson-database")).toContainText("직원 정보");
   await page.reload();
-  await expect(page.locator(".lesson-database")).toContainText("회사 · 인사");
+  await expect(page.locator(".lesson-database")).toContainText("직원 정보");
 });
 test("prepared exercises include setup without revealing the answer", async ({
   page,

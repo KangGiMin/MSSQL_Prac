@@ -1,0 +1,11 @@
+.git
+.openai
+.env
+.env.*
+node_modules
+dist
+tmp
+*.log
+*.bak
+*.mdf
+*.ldf

@@ -23,7 +23,7 @@
 .segmented {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #34313f;
+  border: 1px solid #313a3f;
   background: #171821;
   padding: 4px;
   border-radius: 8px;
@@ -35,27 +35,27 @@
   align-items: center;
   gap: 7px;
   font-size: 12px;
-  color: #7f7c91;
+  color: #7c8991;
   padding: 10px 14px;
   border-radius: 5px;
   white-space: nowrap;
 }
 .segmented > button.active {
-  background: #aa88ec16;
-  color: #c2a6ef;
+  background: #88c7ec16;
+  color: var(--accent-text);
 }
 .segmented > button:hover {
-  color: #c8b8dc;
+  color: var(--accent-text);
 }
 .library-search {
   display: flex;
   align-items: center;
-  border: 1px solid #33303d;
+  border: 1px solid #30383d;
   border-radius: 6px;
   padding: 11px 12px;
   gap: 9px;
   width: 280px;
-  color: #6c647c;
+  color: #64737c;
   background: #16171e;
 }
 .library-search input {
@@ -64,11 +64,11 @@
   border: 0;
   background: none;
   font-size: 12px;
-  color: #bbb2cc;
+  color: #b2c2cc;
   outline: 0;
 }
 .library-search input::placeholder {
-  color: #6e687c;
+  color: #68757c;
 }
 .category-filters {
   display: flex;
@@ -77,23 +77,23 @@
   margin-bottom: 18px;
 }
 .category-filters button {
-  border: 1px solid #33303e;
+  border: 1px solid #30393e;
   padding: 7px 11px;
   border-radius: 6px;
-  color: #7f798f;
+  color: #79878f;
   font-size: 12px;
 }
 .category-filters button.active {
-  background: #a58bd91a;
-  color: #c0a9e3;
-  border-color: #75608e;
+  background: #8bbcd91a;
+  color: var(--accent-text);
+  border-color: #607d8e;
 }
 .category-filters button:hover {
-  border-color: #746184;
+  border-color: #617784;
 }
 .library-summary {
   font-size: 12px;
-  color: #c4bacf;
+  color: #bac7cf;
   margin: 0 0 16px;
 }
 .library-summary span {
@@ -110,7 +110,7 @@
 .lesson-card {
   text-align: left;
   background: #191b23;
-  border: 1px solid #34303f;
+  border: 1px solid #303a3f;
   border-radius: 8px;
   padding: 17px;
   display: grid;
@@ -124,7 +124,7 @@
   align-items: start;
 }
 .lesson-card:hover {
-  border-color: #786590;
+  border-color: #658090;
   transform: none;
   background: #20222d;
 }
@@ -133,11 +133,11 @@
     13px Consolas,
     monospace;
   letter-spacing: 0;
-  color: #b49bce;
+  color: var(--accent-text);
   font-size: 12px;
   text-align: center;
   padding: 7px 2px;
-  background: #272335;
+  background: var(--accent-surface);
   border-radius: 5px;
   line-height: 1.5;
 }
@@ -151,7 +151,7 @@
 .lesson-category i {
   width: 2px;
   height: 2px;
-  background: #64506f;
+  background: #50646f;
   border-radius: 50%;
 }
 .lesson-card h3 {
@@ -203,7 +203,7 @@
   display: block;
   gap: 14px;
   background: transparent;
-  border: 1px solid #50415f70;
+  border: 1px solid #41545f70;
   padding: 16px;
   border-radius: 8px;
   color: #a2a9b7;
@@ -216,27 +216,27 @@
 }
 .coverage-note p {
   font-size: 12px;
-  color: #80758f;
+  color: #75858f;
   margin-top: 8px;
   line-height: 1.9;
 }
 .pdf-tabs {
   display: flex;
   gap: 25px;
-  border-bottom: 1px solid #38303f;
+  border-bottom: 1px solid #303a3f;
   margin-bottom: 24px;
 }
 .pdf-tabs > button {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #83758f;
+  color: #75858f;
   font-size: 13px;
   padding: 0 4px 16px;
   position: relative;
 }
 .pdf-tabs > button.active {
-  color: #cbb1e6;
+  color: var(--accent-text);
 }
 .pdf-tabs > button.active:after {
   content: "";
@@ -244,18 +244,18 @@
   bottom: -1px;
   left: 0;
   right: 0;
-  background: #b899df;
+  background: var(--accent);
   height: 2px;
 }
 .pdf-tabs > button > span {
   font-size: 10px;
-  background: #a58bd912;
+  background: #8bbcd912;
   padding: 3px 5px;
   border-radius: 3px;
-  color: #a082b8;
+  color: #82a4b8;
 }
 .source-reader {
-  border: 1px solid #3b3442;
+  border: 1px solid #343d42;
   border-radius: 10px;
   background: #191920;
   overflow: hidden;
@@ -267,21 +267,21 @@
   justify-content: space-between;
   gap: 14px;
   padding: 16px 18px;
-  border-bottom: 1px solid #332e3b;
+  border-bottom: 1px solid #2e363b;
 }
 .source-toolbar > div {
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 13px;
-  color: #b3a0c6;
+  color: #a0b8c6;
 }
 .source-toolbar strong {
   font-weight: 500;
 }
 .source-toolbar span {
   font-size: 10px;
-  color: #71627f;
+  color: #62747f;
   font-family: Consolas, monospace;
 }
 .source-toolbar a {
@@ -289,7 +289,7 @@
   align-items: center;
   gap: 7px;
   font-size: 12px;
-  color: #9f8eb3;
+  color: #8ea5b3;
 }
 .source-controls {
   display: flex;
@@ -301,11 +301,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid #3c3346;
+  border: 1px solid #333f46;
   border-radius: 6px;
   padding: 9px;
-  color: #807088;
-  background: #14131c;
+  color: #707f88;
+  background: #13191c;
   max-width: 340px;
 }
 .source-search input {
@@ -313,7 +313,7 @@
   width: 100%;
   background: none;
   border: 0;
-  color: #c3b1d2;
+  color: #b1c6d2;
   outline: 0;
   font-size: 12px;
 }
@@ -323,7 +323,7 @@
   gap: 6px;
   margin-left: auto;
   font-size: 12px;
-  color: #85738e;
+  color: #73848e;
 }
 .page-control button {
   height: 26px;
@@ -336,11 +336,11 @@
   width: 44px;
   text-align: center;
   padding: 4px 2px;
-  border: 1px solid #53405e;
-  background: #211a2a;
+  border: 1px solid #40535e;
+  background: #1a242a;
   border-radius: 4px;
   font-size: 12px;
-  color: #c8b0db;
+  color: var(--accent-text);
   -moz-appearance: textfield;
 }
 .page-control input::-webkit-inner-spin-button {
@@ -359,10 +359,10 @@
   overflow: auto;
   padding: 24px 28px;
   background: #14141b;
-  border-top: 1px solid #3c3045;
+  border-top: 1px solid #303d45;
 }
 .source-text > span {
-  color: #776284;
+  color: #627884;
   font-size: 12px;
 }
 .source-text pre {
@@ -370,7 +370,7 @@
     13px/2 "Malgun Gothic",
     sans-serif;
   white-space: pre-wrap;
-  color: #c3b3d3;
+  color: #b3c7d3;
   margin-top: 25px;
   line-height: 1.9;
 }
@@ -385,25 +385,25 @@
   align-items: center;
   gap: 7px;
   flex-wrap: wrap;
-  border-top: 1px solid #342c3e;
+  border-top: 1px solid #2c373e;
   padding: 13px 20px;
   max-height: 150px;
   overflow: auto;
 }
 .source-search-results span {
   font-size: 12px;
-  color: #9681a5;
+  color: #8198a5;
   margin-right: 10px;
 }
 .source-search-results button {
   font-size: 11px;
-  border: 1px solid #53405f;
+  border: 1px solid #40545f;
   border-radius: 4px;
   padding: 5px 7px;
-  color: #bba0ca;
+  color: #a0bbca;
 }
 .source-search-results button:hover {
-  background: #bb99d410;
+  background: #99bed410;
 }
 .history-page {
   margin-bottom: 30px;
@@ -420,7 +420,7 @@
 }
 .history-list article {
   padding: 18px 20px;
-  border: 1px solid #39323f;
+  border: 1px solid #323a3f;
   border-radius: 8px;
   background: #191b23;
   border-color: #333644;
@@ -447,14 +447,14 @@
 }
 .history-list pre {
   background: #12141c;
-  border: 1px solid #302a3c;
+  border: 1px solid #2a353c;
   padding: 12px 14px;
   border-radius: 6px;
   font:
     12px/1.8 Consolas,
     "Malgun Gothic",
     monospace;
-  color: #b3a2c3;
+  color: #a2b7c3;
   overflow: auto;
   max-height: 128px;
   margin: 16px 0;
@@ -490,14 +490,14 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #bc9cd8;
+  color: var(--accent-text);
   padding: 6px 9px;
-  border: 1px solid #68517b70;
+  border: 1px solid #516c7b70;
   border-radius: 4px;
   white-space: nowrap;
 }
 .load-query:hover {
-  background: #aa88d010;
+  background: #88b6d010;
 }
 @media (max-width: 1250px) {
   .lesson-grid {

@@ -3,9 +3,9 @@ import {
   ShoppingBag,
   GraduationCap,
   Check,
-  ArrowUpRight,
   Database,
 } from "lucide-react";
+import { practiceData } from "./labels";
 const icons = { company: Building2, store: ShoppingBag, campus: GraduationCap };
 export default function DatabaseCards({
   databases,
@@ -18,13 +18,21 @@ export default function DatabaseCards({
       <div className="section-heading">
         <h2>
           <Database size={16} />
-          데이터베이스 선택
+          연습할 데이터
         </h2>
-        <span>실습할 데이터를 고르세요</span>
       </div>
-      <div className="database-cards">
+      <p className="database-help">하나를 고르면 아래 SQL 실습에 적용됩니다.</p>
+      <div
+        className="database-cards"
+        role="group"
+        aria-label="연습 데이터 선택"
+      >
         {databases.map((db) => {
           const Icon = icons[db.id] || Database;
+          const presentation = practiceData[db.id] || {
+            name: db.label,
+            description: db.subtitle,
+          };
           return (
             <button
               key={db.id}
@@ -37,20 +45,16 @@ export default function DatabaseCards({
               <span className="database-icon">
                 <Icon size={22} />
               </span>
-              <div>
-                <h3>{db.label}</h3>
-                <p>{db.subtitle}</p>
-                <span className="database-meta">
-                  기본 테이블 {db.tables.length}개
-                </span>
+              <div className="database-label">
+                <h3>{presentation.name}</h3>
+                <p>{presentation.description}</p>
               </div>
-              <span className="card-select">
-                {selected === db.id ? (
-                  <Check size={14} />
-                ) : (
-                  <ArrowUpRight size={17} />
-                )}
-              </span>
+              {selected === db.id && (
+                <span className="card-select">
+                  <Check size={14} aria-hidden="true" />
+                  <span>선택됨</span>
+                </span>
+              )}
             </button>
           );
         })}

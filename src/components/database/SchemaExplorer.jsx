@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { practiceLabel } from "./labels";
 import {
   ChevronRight,
   ChevronDown,
@@ -48,9 +49,9 @@ export default function SchemaExplorer({
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-      <div className="schema-db">
+      <div className="schema-db" title={database?.name}>
         <Database size={14} />
-        {database?.name.replace("QueryGround_", "")}
+        {database && practiceLabel(database.id)}
         <span>스키마</span>
       </div>
       <div className="schema-tree">

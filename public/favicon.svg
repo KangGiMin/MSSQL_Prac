@@ -1,1 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="12" fill="#9e84ff"/><path d="m12 14 6 6-6 6m9 0h7" fill="none" stroke="#17131f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <defs>
+    <linearGradient id="sql-blue" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#1479ed" />
+      <stop offset="1" stop-color="#21c3ed" />
+    </linearGradient>
+  </defs>
+  <rect width="40" height="40" rx="12" fill="url(#sql-blue)" />
+  <path
+    d="m12 14 6 6-6 6m9 0h7"
+    fill="none"
+    stroke="#071d30"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

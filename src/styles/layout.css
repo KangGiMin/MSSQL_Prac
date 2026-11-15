@@ -28,12 +28,12 @@
   width: 32px;
   height: 32px;
   border-radius: 9px;
-  background: #b09aff;
-  color: #201632;
+  background: var(--accent-gradient);
+  color: var(--accent-ink);
   margin-right: 9px;
 }
 .brand-dot {
-  color: #b19afc;
+  color: var(--accent-text);
 }
 .nav-label {
   font-size: 11px;
@@ -57,11 +57,11 @@
 }
 .nav-item:hover {
   background: #ffffff04;
-  color: #d9d6e2;
+  color: #d6dee2;
 }
 .nav-item.active {
-  background: #a484ff17;
-  color: #bea7ff;
+  background: #84d2ff17;
+  color: var(--accent-text);
 }
 .nav-count {
   font-size: 11px;
@@ -88,11 +88,11 @@
 }
 .study-progress > div > span {
   font-size: 12px;
-  color: #b8b4c7;
+  color: #b4c0c7;
 }
 .study-progress strong {
   font-size: 17px;
-  color: #b8a0ff;
+  color: var(--accent-text);
   font-weight: 550;
 }
 .study-progress strong small {
@@ -101,7 +101,7 @@
 }
 .progress-track {
   height: 4px;
-  background: #34303e;
+  background: #30393e;
   border-radius: 5px;
   overflow: hidden;
   margin-top: 13px;
@@ -110,7 +110,7 @@
   height: 100%;
   display: block;
   border-radius: 5px;
-  background: #ad91fa;
+  background: var(--accent);
   transition: width 0.5s;
 }
 .study-progress p {
@@ -132,7 +132,7 @@
   padding: 20px 10px;
 }
 .docs-link:hover {
-  color: #c4b4ef;
+  color: var(--accent-text);
 }
 .app-body {
   margin-left: var(--sidebar);
@@ -196,7 +196,7 @@
   color: #8d8f9e;
 }
 .help-button:hover {
-  color: #d5c5ff;
+  color: var(--accent-text);
 }
 .main-content {
   padding: 24px 28px 0;
@@ -211,7 +211,7 @@
   overflow: hidden;
   padding: 20px 22px;
   min-height: 108px;
-  border: 1px solid #34303e;
+  border: 1px solid #30393e;
   border-radius: 8px;
   background: #171920;
   margin-bottom: 24px;
@@ -238,17 +238,17 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid #5c4b75;
+  border: 1px solid #4b6675;
   border-radius: 6px;
   padding: 10px 13px;
   font-size: 12px;
   margin-top: 0;
-  color: #ccbae9;
+  color: var(--accent-text);
   background: transparent;
   white-space: nowrap;
 }
 .hero button:hover {
-  background: #252234;
+  background: #222d34;
 }
 .database-section {
   margin-bottom: 28px;
@@ -260,24 +260,24 @@
 }
 .database-card {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   position: relative;
   text-align: left;
   border: 1px solid #30313c;
   border-radius: 8px;
-  padding: 16px;
+  padding: 14px;
   background: #191b23;
-  min-height: 96px;
+  min-height: 80px;
   overflow: hidden;
 }
 .database-card:hover {
-  border-color: #706285;
+  border-color: #627885;
   background: #20222c;
 }
 .database-card.selected {
-  border-color: #9e86d6;
-  background: #242132;
+  border-color: var(--accent-border);
+  background: var(--accent-surface);
 }
 .database-icon {
   display: flex;
@@ -294,37 +294,33 @@
   font-size: 14px;
   font-weight: 600;
   margin: 0 0 6px;
+  padding-right: 58px;
 }
 .database-card p {
   font-size: 12px;
   color: #a2a9b7;
   line-height: 1.7;
   margin-right: 14px;
-}
-.database-meta {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #929baa;
-  margin-top: 8px;
-  font-family: inherit;
-  font-size: 11px;
+  display: block;
 }
 .card-select {
   position: absolute;
   right: 14px;
-  top: 19px;
+  top: 14px;
   color: #595b6b;
 }
 .selected .card-select {
-  background: #aa90e7;
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
+  background: #a5deff12;
+  border-radius: 5px;
+  width: auto;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #251e31;
+  color: var(--accent-text);
+  padding: 4px 6px;
+  gap: 4px;
+  font-size: 11px;
 }
 .main-footer {
   padding: 20px 0;
@@ -408,11 +404,13 @@
   .database-card p {
     font-size: 11px;
     color: #a2a9b7;
+    display: block;
   }
   .database-card h3 {
     font-size: 14px;
     font-weight: 600;
     margin: 0 0 6px;
+    padding-right: 58px;
   }
   .database-icon {
     width: 30px;
@@ -424,9 +422,6 @@
   .card-select {
     right: 10px;
     top: 17px;
-  }
-  .database-meta {
-    font-size: 10px;
   }
 }
 @media (max-width: 1000px) {
@@ -445,14 +440,11 @@
   .help-button {
   }
   .database-card p {
-    display: none;
+    display: block;
     color: #a2a9b7;
   }
   .database-card {
-    min-height: 96px;
-  }
-  .database-meta {
-    margin-top: 16px;
+    min-height: 80px;
   }
   .brand {
     font-size: 16px;
@@ -505,7 +497,7 @@
     color: #a2a9b7;
   }
   .database-card {
-    min-height: 96px;
+    min-height: 80px;
   }
 }
 @media (max-width: 640px) {
@@ -556,7 +548,7 @@
     gap: 8px;
   }
   .database-card {
-    min-height: 90px;
+    min-height: 106px;
     padding: 12px 6px;
     align-items: center;
     gap: 8px;
@@ -565,23 +557,17 @@
     text-align: center;
   }
   .database-card p {
-    font-size: 12px;
+    font-size: 11px;
     margin: 0;
     color: #a2a9b7;
-    display: none;
+    display: block;
+    line-height: 1.5;
   }
   .database-card h3 {
     margin: 0;
     font-size: 12px;
     font-weight: 600;
-  }
-  .database-meta {
-    position: absolute;
-    right: 37px;
-    bottom: 15px;
-    margin: 0;
-    font-size: 10px;
-    display: none;
+    padding-right: 0;
   }
   .database-icon {
     width: 28px;
@@ -631,5 +617,35 @@
   }
   .help-button span {
     display: none;
+  }
+}
+.database-section .section-heading {
+  margin-bottom: 6px;
+}
+.database-help {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #a2a9b7;
+  margin: 0 0 13px;
+}
+.database-label {
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  .database-card.selected .card-select {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    top: 5px;
+    right: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #1e2a31;
+  }
+  .card-select > span {
+    display: none;
+  }
+  .database-card p {
+    margin-right: 0;
   }
 }

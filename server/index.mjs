@@ -5,19 +5,13 @@ import { fileURLToPath } from "node:url";
 import { config } from "./config/env.mjs";
 import { api } from "./routes/api.mjs";
 import { describeError } from "./services/errors.mjs";
+import { createAccessControl } from "./middleware/access.mjs";
 
 export const app = express();
 app.disable("x-powered-by");
-// Local personal SQL console. Do not expose a privileged SQL execution API publicly.
+app.use(createAccessControl());
+app.get("/healthz", (_req, res) => res.json({ ok: true }));
 app.use((req, res, next) => {
-  const remote = req.socket.remoteAddress;
-  if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote))
-    return res
-      .status(403)
-      .json({ error: "이 실습 서버는 로컬에서만 사용할 수 있습니다." });
-  const origin = req.get("origin");
-  if (origin && !/^https?:\/\/(localhost|127\.0\.0\.1)(?::\d+)?$/.test(origin))
-    return res.status(403).json({ error: "허용되지 않은 요청 출처입니다." });
   if (
     req.path.startsWith("/api") &&
     !["GET", "HEAD"].includes(req.method) &&

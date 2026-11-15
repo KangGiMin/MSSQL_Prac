@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: queryground
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeployTrigger: off
+    envVars:
+      - key: DEPLOYMENT_MODE
+        value: hosted
+      - key: SQL_PLATFORM
+        value: azure
+      - key: SQL_AUTH
+        value: sql
+      - key: SQL_ENCRYPT
+        value: "true"
+      - key: SQL_TRUST_CERTIFICATE
+        value: "false"
+      - key: SQL_SERVER
+        sync: false
+      - key: SQL_USER
+        sync: false
+      - key: SQL_PASSWORD
+        sync: false
+      - key: APP_USER
+        value: queryground
+      - key: APP_PASSWORD
+        generateValue: true

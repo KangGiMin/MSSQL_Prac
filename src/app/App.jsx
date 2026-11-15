@@ -22,10 +22,12 @@ import Header from "../components/layout/Header";
 import Hero from "../components/common/Hero";
 import Modal from "../components/common/Modal";
 import DatabaseCards from "../components/database/DatabaseCards";
+import { practiceLabel } from "../components/database/labels";
 import SchemaExplorer from "../components/database/SchemaExplorer";
 const QueryEditor = lazy(() => import("../components/editor/QueryEditor"));
 import QueryResults from "../components/results/QueryResults";
 import LessonPanel from "../components/learning/LessonPanel";
+import PracticeProblem from "../components/learning/PracticeProblem";
 import LessonLibrary from "../components/learning/LessonLibrary";
 import SourceReader from "../components/learning/SourceReader";
 import HistoryList from "../components/history/HistoryList";
@@ -34,6 +36,11 @@ import { useQueryRunner } from "../hooks/useQueryRunner";
 import { api } from "../lib/api";
 import { lessons, sourceCoverage } from "../../shared/curriculum.mjs";
 import { databases } from "../../shared/databases.mjs";
+import { pickPracticeProblem } from "../../shared/practice-problems.mjs";
+import {
+  readPracticeSession,
+  savePracticeSession,
+} from "../lib/practiceSession";
 import {
   archiveDraft,
   readArchives,
@@ -65,7 +72,17 @@ export default function App() {
     [health, setHealth] = useState(null);
   const [selected, setSelected] = useLocalStorage("qg.database", "campus");
   const database = databases.find((d) => d.id === selected) || databases[2];
-  const [queries, setQueries, queryStorage] = useLocalStorage(
+  const [pageSession] = useState(readPracticeSession);
+  const [practiceMode, setPracticeMode] = useState(true);
+  const [practiceByDatabase, setPracticeByDatabase] = useState(() =>
+    Object.fromEntries(
+      databases.map((db) => [
+        db.id,
+        pickPracticeProblem(db.id, pageSession.problemIds[db.id]),
+      ]),
+    ),
+  );
+  const [storedQueries, setQueries, queryStorage] = useLocalStorage(
       "qg.queries",
       defaults,
     ),
@@ -75,6 +92,26 @@ export default function App() {
       "qg.completed",
       [],
     );
+  const resetOnReload = pageSession.reload && pageSession.view === "playground";
+  const [blankDatabases, setBlankDatabases] = useState(() => [
+    ...new Set([
+      ...pageSession.blankDatabases,
+      ...(resetOnReload ? [database.id] : []),
+    ]),
+  ]);
+  const initialRefreshDraft = useRef(
+    resetOnReload && !pageSession.blankDatabases.includes(database.id)
+      ? { database: database.id, previous: storedQueries[database.id] }
+      : null,
+  );
+  // The blank editor belongs to this tab; other open tabs keep their drafts.
+  const queries = {
+    ...storedQueries,
+    ...Object.fromEntries(blankDatabases.map((id) => [id, ""])),
+  };
+  useEffect(() => {
+    savePracticeSession(view, practiceByDatabase, blankDatabases);
+  }, [view, practiceByDatabase, blankDatabases]);
   const [lessonIds, setLessonIds] = useLocalStorage(
     "qg.lessons",
     Object.fromEntries(
@@ -115,14 +152,47 @@ export default function App() {
     typeof queries[database.id] === "string"
       ? queries[database.id]
       : defaults[database.id];
-  const updateQuery = (value) =>
+  const updateQuery = (value) => {
+    if (blankDatabases.includes(database.id))
+      setBlankDatabases((current) =>
+        current.filter((id) => id !== database.id),
+      );
     setQueries((q) => ({ ...q, [database.id]: value }));
+  };
   const notify = useCallback((message) => {
     setToast(message);
     clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(""), 3500);
   }, []);
   useEffect(() => () => clearTimeout(toastTimer.current), []);
+  const refreshArchived = useRef(false);
+  useEffect(() => {
+    if (refreshArchived.current) return;
+    refreshArchived.current = true;
+    const refreshDraft = initialRefreshDraft.current;
+    if (
+      !refreshDraft ||
+      !refreshDraft.previous?.trim() ||
+      refreshDraft.previous === defaults[refreshDraft.database]
+    )
+      return;
+    try {
+      const title = "새로고침 전 자동 보관";
+      if (
+        !readArchives().some(
+          (item) =>
+            item.database === refreshDraft.database &&
+            item.sql === refreshDraft.previous &&
+            item.title === title,
+        )
+      )
+        archiveDraft(refreshDraft.database, refreshDraft.previous, title);
+    } catch {
+      notify(
+        "이전 SQL을 자동 보관하지 못했습니다. 기존 저장 내용은 유지됩니다.",
+      );
+    }
+  }, [notify]);
   const closeMobileMenu = useCallback(() => setMobileMenu(false), []);
   const refreshHealth = useCallback(async () => {
     const generation = ++healthGeneration.current;
@@ -184,7 +254,15 @@ export default function App() {
   const switchDatabase = (id) => {
     if (runner.running || resetting) return;
     setSelected(id);
+    setPracticeMode(true);
     runner.clear();
+  };
+  const nextPracticeProblem = () => {
+    if (runner.running || resetting) return;
+    setPracticeByDatabase((current) => ({
+      ...current,
+      [database.id]: pickPracticeProblem(database.id, current[database.id]?.id),
+    }));
   };
   const replaceQuery = (id, sql) => {
     const previous = queries[id] || "";
@@ -199,6 +277,9 @@ export default function App() {
       }
     }
     setQueries((current) => ({ ...current, [id]: sql }));
+    setBlankDatabases((current) =>
+      current.filter((database) => database !== id),
+    );
     runner.clear();
     return true;
   };
@@ -213,6 +294,7 @@ export default function App() {
     if (!replaceQuery(item.database, sql)) return;
     setSelected(item.database);
     setLessonIds((current) => ({ ...current, [item.database]: item.id }));
+    setPracticeMode(false);
     setView("playground");
     runner.clear();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -229,6 +311,7 @@ export default function App() {
     }
     if (!replaceQuery(item.database, item.sql)) return;
     setSelected(item.database);
+    setPracticeMode(true);
     setView("playground");
     runner.clear();
   };
@@ -242,7 +325,7 @@ export default function App() {
       await api.reset(database.id);
       runner.clear();
       setSchemaRevision((x) => x + 1);
-      notify(`${database.label} 데이터베이스를 초기화했습니다.`);
+      notify(`${practiceLabel(database.id)} 데이터를 초기화했습니다.`);
       setModal(null);
       refreshHealth();
     } catch (e) {
@@ -330,6 +413,7 @@ export default function App() {
           typeof item.sql === "string"
         )
           archiveDraft(item.database, item.sql, item.title);
+      setBlankDatabases([]);
       const results = await Promise.all([
         setQueries(data.queries),
         setHistory((items) =>
@@ -366,7 +450,10 @@ export default function App() {
     <div className="app">
       <Sidebar
         view={view}
-        onNavigate={setView}
+        onNavigate={(nextView) => {
+          setView(nextView);
+          if (nextView === "playground") setPracticeMode(true);
+        }}
         completed={
           completed.filter((id) => lessons.some((l) => l.id === id)).length
         }
@@ -440,7 +527,16 @@ export default function App() {
                     </button>
                   </div>
                 )}
-                <div className="workbench">
+                {practiceMode && (
+                  <PracticeProblem
+                    problem={practiceByDatabase[database.id]}
+                    onNext={nextPracticeProblem}
+                    disabled={runner.running || resetting}
+                  />
+                )}
+                <div
+                  className={`workbench${practiceMode ? " practice-workbench" : ""}`}
+                >
                   <SchemaExplorer
                     schema={schema}
                     loading={schemaLoading}
@@ -494,16 +590,18 @@ export default function App() {
                       canceling={runner.canceling}
                     />
                   </div>
-                  <LessonPanel
-                    sourceMatches={sourceCoverage.matchesSource}
-                    lesson={lesson}
-                    onLoad={loadLesson}
-                    onSource={openSource}
-                    completed={completed.includes(lesson.id)}
-                    onComplete={toggleComplete}
-                    onBrowse={() => setView("learn")}
-                    disabled={runner.running || resetting}
-                  />
+                  {!practiceMode && (
+                    <LessonPanel
+                      sourceMatches={sourceCoverage.matchesSource}
+                      lesson={lesson}
+                      onLoad={loadLesson}
+                      onSource={openSource}
+                      completed={completed.includes(lesson.id)}
+                      onComplete={toggleComplete}
+                      onBrowse={() => setView("learn")}
+                      disabled={runner.running || resetting}
+                    />
+                  )}
                 </div>
                 <div className="workbench-footnote">
                   <span>
@@ -610,7 +708,7 @@ export default function App() {
           )}
           <footer className="main-footer">
             <span>
-              QueryGround<span className="purple-text">.</span>{" "}
+              QueryGround<span className="accent-text">.</span>{" "}
               <span>나만의 SQL 실습실</span>
             </span>
           </footer>
@@ -641,7 +739,7 @@ export default function App() {
               <div className="modal-db">
                 <Database size={22} />
                 <div>
-                  {database.label}
+                  {practiceLabel(database.id)}
                   <small>{database.name}</small>
                 </div>
               </div>
@@ -739,7 +837,7 @@ export default function App() {
               <ol>
                 <li>
                   <strong>DB 선택</strong>
-                  <span>회사·스토어·캠퍼스 중 데이터를 고르세요.</span>
+                  <span>직원 정보·주문 정보·학생 성적 중 하나를 고르세요.</span>
                 </li>
                 <li>
                   <strong>쿼리 작성과 실행</strong>
