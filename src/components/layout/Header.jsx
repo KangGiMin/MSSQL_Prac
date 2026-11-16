@@ -1,10 +1,5 @@
 import { Menu, CircleHelp } from "lucide-react";
-const labels = {
-  playground: "자유 실습",
-  learn: "학습 로드맵",
-  pdf: "PDF 문제집",
-  history: "실행 기록",
-};
+import { views } from "../../config/navigation";
 export default function Header({ view, health, onMenu, onHelp, menuOpen }) {
   return (
     <header className="topbar">
@@ -18,7 +13,7 @@ export default function Header({ view, health, onMenu, onHelp, menuOpen }) {
         >
           <Menu size={20} />
         </button>
-        <strong>{labels[view]}</strong>
+        <strong>{views[view]?.label}</strong>
       </div>
       <div className="topbar-right">
         <span

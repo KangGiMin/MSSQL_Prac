@@ -1,3 +1,4 @@
+import { sourceUrls } from "../../../shared/workspace.mjs";
 import { useEffect, useState } from "react";
 import {
   ChevronLeft,
@@ -13,7 +14,7 @@ export default function SourceReader({ page, onPage, pageCount = 0 }) {
     [textMode, setTextMode] = useState(false);
   useEffect(() => {
     let live = true;
-    fetch("/materials/pages.json")
+    fetch(sourceUrls.pages)
       .then((r) => {
         if (!r.ok) throw new Error("원본 텍스트를 읽을 수 없습니다.");
         return r.json();
@@ -57,7 +58,7 @@ export default function SourceReader({ page, onPage, pageCount = 0 }) {
           <span>{total || "…"}쪽</span>
         </div>
         <a
-          href={`/materials/sql-reference.pdf#page=${page}`}
+          href={`${sourceUrls.pdf}#page=${page}`}
           target="_blank"
           rel="noreferrer"
         >
@@ -140,7 +141,7 @@ export default function SourceReader({ page, onPage, pageCount = 0 }) {
         <iframe
           key={page}
           title={`PDF 원본 ${page}쪽`}
-          src={`/materials/sql-reference.pdf#page=${page}&view=FitH`}
+          src={`${sourceUrls.pdf}#page=${page}&view=FitH`}
           className="pdf-frame"
         />
       )}

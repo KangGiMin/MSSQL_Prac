@@ -37,7 +37,7 @@
 }
 .nav-label {
   font-size: 11px;
-  color: #929baa;
+  color: var(--text-subtle);
   letter-spacing: 0.4px;
   font-weight: 600;
   margin: 12px 12px 10px;
@@ -121,7 +121,7 @@
   color: #868092;
 }
 .study-progress p span {
-  color: #929baa;
+  color: var(--text-subtle);
 }
 .docs-link {
   display: flex;
@@ -144,7 +144,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
-  background: #101116;
+  background: var(--bg);
   position: sticky;
   top: 0;
   z-index: 25;
@@ -213,7 +213,7 @@
   min-height: 108px;
   border: 1px solid #30393e;
   border-radius: 8px;
-  background: #171920;
+  background: var(--surface);
   margin-bottom: 24px;
 }
 .hero h1 {
@@ -267,7 +267,7 @@
   border: 1px solid #30313c;
   border-radius: 8px;
   padding: 14px;
-  background: #191b23;
+  background: var(--surface-raised);
   min-height: 80px;
   overflow: hidden;
 }
@@ -298,7 +298,7 @@
 }
 .database-card p {
   font-size: 12px;
-  color: #a2a9b7;
+  color: var(--text-secondary);
   line-height: 1.7;
   margin-right: 14px;
   display: block;
@@ -329,7 +329,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 11px;
-  color: #929baa;
+  color: var(--text-subtle);
 }
 .main-footer > span:first-child {
   font-weight: 600;
@@ -338,7 +338,7 @@
 .main-footer > span:first-child > span:last-child {
   font-weight: 400;
   margin-left: 8px;
-  color: #929baa;
+  color: var(--text-subtle);
 }
 .mobile-shade,
 .mobile-close,
@@ -353,7 +353,7 @@
     min-height: 108px;
     padding: 20px 22px;
     margin-bottom: 24px;
-    background: #171920;
+    background: var(--surface);
     border-radius: 8px;
   }
   .hero h1 {
@@ -384,7 +384,7 @@
     padding: 20px 22px;
     min-height: 108px;
     margin-bottom: 24px;
-    background: #171920;
+    background: var(--surface);
     border-radius: 8px;
   }
   .hero h1 {
@@ -403,7 +403,7 @@
   }
   .database-card p {
     font-size: 11px;
-    color: #a2a9b7;
+    color: var(--text-secondary);
     display: block;
   }
   .database-card h3 {
@@ -441,7 +441,7 @@
   }
   .database-card p {
     display: block;
-    color: #a2a9b7;
+    color: var(--text-secondary);
   }
   .database-card {
     min-height: 80px;
@@ -477,7 +477,7 @@
     display: block;
     position: fixed;
     inset: 0;
-    background: #0008;
+    background: var(--overlay);
     z-index: 39;
   }
   .brand {
@@ -494,7 +494,7 @@
   }
   .database-card p {
     display: block;
-    color: #a2a9b7;
+    color: var(--text-secondary);
   }
   .database-card {
     min-height: 80px;
@@ -522,7 +522,7 @@
     padding: 18px;
     min-height: 126px;
     margin-bottom: 20px;
-    background: #171920;
+    background: var(--surface);
     border-radius: 8px;
     align-items: flex-start;
     flex-direction: column;
@@ -541,7 +541,7 @@
   }
   .section-heading > span {
     display: none;
-    color: #9aa2b1;
+    color: var(--muted);
   }
   .database-cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -559,7 +559,7 @@
   .database-card p {
     font-size: 11px;
     margin: 0;
-    color: #a2a9b7;
+    color: var(--text-secondary);
     display: block;
     line-height: 1.5;
   }
@@ -603,7 +603,7 @@
   .modal {
     padding: 22px;
     border-radius: 10px;
-    box-shadow: 0 16px 48px #0008;
+    box-shadow: 0 16px 48px var(--overlay);
   }
   .modal-heading h2 {
     font-size: 16px;
@@ -625,7 +625,7 @@
 .database-help {
   font-size: 12px;
   line-height: 1.7;
-  color: #a2a9b7;
+  color: var(--text-secondary);
   margin: 0 0 13px;
 }
 .database-label {

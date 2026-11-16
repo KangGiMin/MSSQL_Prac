@@ -1,6 +1,7 @@
 import { databases } from "../../shared/databases.mjs";
 
-const key = "qg.practice-session";
+import { practiceSessionKey as key } from "../../shared/workspace.mjs";
+import { views } from "../config/navigation.js";
 
 export function readPracticeSession() {
   const session = {
@@ -15,8 +16,7 @@ export function readPracticeSession() {
   try {
     const saved = JSON.parse(window.sessionStorage.getItem(key));
     if (saved && typeof saved === "object") {
-      if (["playground", "learn", "pdf", "history"].includes(saved.view))
-        session.view = saved.view;
+      if (Object.keys(views).includes(saved.view)) session.view = saved.view;
       if (saved.problemIds && typeof saved.problemIds === "object")
         session.problemIds = saved.problemIds;
       if (Array.isArray(saved.blankDatabases))

@@ -9,7 +9,7 @@
 }
 .page-heading > p {
   font-size: 13px;
-  color: #a2a9b7;
+  color: var(--text-secondary);
   line-height: 1.8;
 }
 .library-controls {
@@ -98,7 +98,7 @@
 }
 .library-summary span {
   float: right;
-  color: #929baa;
+  color: var(--text-subtle);
   font-size: 12px;
 }
 .lesson-grid {
@@ -109,7 +109,7 @@
 }
 .lesson-card {
   text-align: left;
-  background: #191b23;
+  background: var(--surface-raised);
   border: 1px solid #303a3f;
   border-radius: 8px;
   padding: 17px;
@@ -164,7 +164,7 @@
 }
 .lesson-card p {
   font-size: 12px;
-  color: #a2a9b7;
+  color: var(--text-secondary);
   line-height: 1.75;
   margin-bottom: 20px;
   display: -webkit-box;
@@ -206,7 +206,7 @@
   border: 1px solid #41545f70;
   padding: 16px;
   border-radius: 8px;
-  color: #a2a9b7;
+  color: var(--text-secondary);
   margin: 20px 0;
   border-color: #343644;
 }
@@ -377,7 +377,7 @@
 .source-footnote {
   font-size: 11px;
   line-height: 1.9;
-  color: #9aa2b1;
+  color: var(--muted);
   padding: 14px 20px;
 }
 .source-search-results {
@@ -422,7 +422,7 @@
   padding: 18px 20px;
   border: 1px solid #323a3f;
   border-radius: 8px;
-  background: #191b23;
+  background: var(--surface-raised);
   border-color: #333644;
 }
 .history-item-heading {
@@ -443,7 +443,7 @@
 }
 .history-item-heading time {
   font-size: 11px;
-  color: #9aa2b1;
+  color: var(--muted);
 }
 .history-list pre {
   background: #12141c;
@@ -469,7 +469,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #9aa2b1;
+  color: var(--muted);
   font-size: 11px;
   max-width: 70%;
   overflow: hidden;
@@ -529,7 +529,7 @@
     display: grid;
     grid-template-columns: 44px minmax(0, 1fr);
     gap: 14px;
-    background: #191b23;
+    background: var(--surface-raised);
     min-height: 0;
     border-radius: 8px;
     transition:
@@ -595,7 +595,7 @@
     display: grid;
     grid-template-columns: 40px minmax(0, 1fr);
     gap: 10px;
-    background: #191b23;
+    background: var(--surface-raised);
     border-radius: 8px;
     transition:
       border-color 0.15s,
@@ -614,7 +614,7 @@
     margin: 8px 0 12px;
     line-height: 1.75;
     min-height: 0;
-    color: #a2a9b7;
+    color: var(--text-secondary);
   }
   .category-filters {
     gap: 6px;
@@ -644,7 +644,7 @@
     display: block;
     background: transparent;
     margin: 20px 0;
-    color: #a2a9b7;
+    color: var(--text-secondary);
     border-color: #343644;
   }
   .coverage-note strong {
@@ -687,11 +687,11 @@
   .source-footnote {
     padding: 12px 15px;
     font-size: 10px;
-    color: #9aa2b1;
+    color: var(--muted);
   }
   .history-list article {
     padding: 16px;
-    background: #191b23;
+    background: var(--surface-raised);
     border-radius: 8px;
     border-color: #333644;
   }
@@ -700,7 +700,7 @@
   }
   .history-item-heading time {
     font-size: 10px;
-    color: #9aa2b1;
+    color: var(--muted);
   }
   .history-list pre {
     font-size: 12px;
@@ -717,7 +717,7 @@
   }
   .history-list footer > span {
     max-width: 50%;
-    color: #9aa2b1;
+    color: var(--muted);
   }
   .load-query {
     font-size: 11px;
@@ -741,7 +741,7 @@
 }
 .lesson-card-title > svg {
   margin-top: 3px;
-  color: #929baa;
+  color: var(--text-subtle);
 }
 .coverage-note summary {
   cursor: pointer;

@@ -19,13 +19,13 @@
   border: 1px solid #30313c;
   border-radius: 8px;
   overflow: hidden;
-  background: #15171f;
+  background: var(--editor-bg);
   align-items: stretch;
 }
 .schema-panel {
   border-right: 1px solid #2d2f39;
   position: relative;
-  background: #171920;
+  background: var(--surface);
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -47,7 +47,7 @@
   gap: 6px;
   margin: 12px 10px;
   padding: 7px 8px;
-  border: 1px solid #30313d;
+  border: 1px solid var(--border-strong);
   border-radius: 5px;
   color: #626576;
 }
@@ -61,7 +61,7 @@
   outline: 0;
 }
 .schema-search input::placeholder {
-  color: #929baa;
+  color: var(--text-subtle);
 }
 .schema-db {
   display: flex;
@@ -125,7 +125,7 @@
 }
 .table-expand small {
   margin-left: auto;
-  color: #929baa;
+  color: var(--text-subtle);
   font-size: 11px;
 }
 .preview-table {
@@ -184,7 +184,7 @@
   font-size: 10px;
   letter-spacing: -0.3px;
   margin-left: auto;
-  color: #929baa;
+  color: var(--text-subtle);
   white-space: nowrap;
 }
 .schema-footer {
@@ -192,7 +192,7 @@
   border-top: 1px solid #282a35;
   padding: 12px 10px;
   font-size: 10px;
-  color: #9aa2b1;
+  color: var(--muted);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -283,7 +283,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  color: #a2a9b7;
+  color: var(--text-secondary);
   font-size: 11px;
 }
 .practice-problem-tables code {
@@ -325,7 +325,7 @@
 }
 .practice-problem-note {
   margin-top: 14px;
-  color: #9aa2b1;
+  color: var(--muted);
   font-size: 11px;
   line-height: 1.8;
 }
@@ -366,8 +366,8 @@
   font:
     12px Consolas,
     monospace;
-  background: #15171f;
-  border-right: 1px solid #292b35;
+  background: var(--editor-bg);
+  border-right: 1px solid var(--border);
   border-top: 2px solid var(--accent);
   min-width: 126px;
 }
@@ -413,7 +413,7 @@
   align-items: center;
   gap: 5px;
   font-size: 10px;
-  color: #9aa2b1;
+  color: var(--muted);
   white-space: nowrap;
 }
 .editor-toolbar .tiny-dot {
@@ -478,9 +478,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 13px;
-  color: #929baa;
+  color: var(--text-subtle);
   font-size: 10px;
-  border-bottom: 1px solid #30313d;
+  border-bottom: 1px solid var(--border-strong);
   flex-wrap: wrap;
   gap: 4px;
   min-height: 28px;
@@ -585,7 +585,7 @@
 .result-empty p {
   font-size: 11px;
   line-height: 1.8;
-  color: #9aa2b1;
+  color: var(--muted);
 }
 .result-empty p kbd {
   font-size: 10px;
@@ -637,7 +637,7 @@
   background: #93cdee08;
 }
 .result-table .row-number {
-  color: #929baa;
+  color: var(--text-subtle);
   font-size: 11px;
   width: 33px;
   padding: 8px 12px;
@@ -678,7 +678,7 @@
 }
 .message-output small {
   font-size: 11px;
-  color: #9aa2b1;
+  color: var(--muted);
   display: block;
   margin-top: 24px;
 }
@@ -737,7 +737,7 @@
   font:
     11px Consolas,
     monospace;
-  color: #a2a9b7;
+  color: var(--text-secondary);
 }
 .result-status.has-error {
   background: #241c25;
@@ -794,7 +794,7 @@
   color: #a3bccb;
 }
 .pagination span {
-  color: #929baa;
+  color: var(--text-subtle);
 }
 .truncated-note {
   padding: 10px;
@@ -808,7 +808,7 @@
   align-items: center;
   justify-content: space-between;
   font-size: 10px;
-  color: #929baa;
+  color: var(--text-subtle);
   padding: 13px 2px 22px;
   gap: 15px;
   line-height: 1.8;
@@ -822,11 +822,11 @@
   color: #687881;
 }
 .lesson-panel {
-  border-left: 1px solid #30313d;
+  border-left: 1px solid var(--border-strong);
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: #191b23;
+  background: var(--surface-raised);
 }
 .lesson-panel-top {
   display: flex;
@@ -901,7 +901,7 @@
 }
 .lesson-database {
   font-size: 11px;
-  color: #9aa2b1;
+  color: var(--muted);
   padding: 14px 0 17px;
   border-bottom: 1px solid #2c363b;
   display: flex;
@@ -1029,7 +1029,7 @@
 }
 .lesson-actions small {
   font-size: 10px;
-  color: #929baa;
+  color: var(--text-subtle);
   display: block;
   margin-top: 9px;
 }
@@ -1077,11 +1077,11 @@
   }
   .editor-toolbar > span {
     font-size: 10px;
-    color: #9aa2b1;
+    color: var(--muted);
   }
   .table-columns small {
     font-size: 10px;
-    color: #929baa;
+    color: var(--text-subtle);
   }
 }
 @media (max-width: 1150px) {
@@ -1091,8 +1091,8 @@
   .lesson-panel {
     grid-column: 1/-1;
     border-left: 0;
-    border-top: 1px solid #30313d;
-    background: #191b23;
+    border-top: 1px solid var(--border-strong);
+    background: var(--surface-raised);
   }
   .lesson-content {
     max-height: none;
@@ -1148,7 +1148,7 @@
   }
   .lesson-actions small {
     margin: 0;
-    color: #929baa;
+    color: var(--text-subtle);
   }
   .schema-tree {
     max-height: 550px;
@@ -1158,14 +1158,14 @@
   }
   .schema-footer {
     font-size: 10px;
-    color: #9aa2b1;
+    color: var(--muted);
   }
   .editor-dialect {
     font-size: 10px;
   }
   .editor-toolbar > span {
     font-size: 10px;
-    color: #9aa2b1;
+    color: var(--muted);
   }
   .editor-toolbar > div {
     gap: 10px;
@@ -1180,7 +1180,7 @@
   }
   .schema-panel {
     border-right: 0;
-    border-bottom: 1px solid #30313d;
+    border-bottom: 1px solid var(--border-strong);
     max-height: 210px;
   }
   .schema-tree {
@@ -1226,7 +1226,7 @@
   }
   .schema-footer {
     display: none;
-    color: #9aa2b1;
+    color: var(--muted);
   }
   .panel-title {
     height: 37px;
@@ -1243,7 +1243,7 @@
   }
   .editor-toolbar > span {
     font-size: 10px;
-    color: #9aa2b1;
+    color: var(--muted);
   }
   .editor-toolbar .text-button {
     font-size: 11px;
@@ -1266,14 +1266,14 @@
     flex-wrap: wrap;
     gap: 4px;
     min-height: 28px;
-    color: #929baa;
+    color: var(--text-subtle);
   }
   .result-empty {
     min-height: 170px;
   }
   .result-empty p {
     font-size: 11px;
-    color: #9aa2b1;
+    color: var(--muted);
   }
   .results-toolbar > div {
     gap: 15px;
@@ -1298,7 +1298,7 @@
   }
   .lesson-actions small {
     margin-top: 8px;
-    color: #929baa;
+    color: var(--text-subtle);
   }
   .workbench-footnote {
     font-size: 10px;

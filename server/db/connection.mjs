@@ -1,3 +1,5 @@
+import { connectionLimits } from "../config/limits.mjs";
+import { studentSessionSql } from "./statements.mjs";
 import { config } from "../config/env.mjs";
 
 // node-mssql drivers share base classes; load exactly one driver per process.
@@ -10,9 +12,13 @@ export async function connect(
 ) {
   const common = {
     database,
-    connectionTimeout: Math.min(8000, timeout),
+    connectionTimeout: Math.min(connectionLimits.connectMs, timeout),
     requestTimeout: timeout,
-    pool: { min: keepAlive ? 1 : 0, max: 1, idleTimeoutMillis: 1000 },
+    pool: {
+      min: keepAlive ? 1 : 0,
+      max: 1,
+      idleTimeoutMillis: connectionLimits.idleMs,
+    },
   };
   let options;
   if (config.auth === "sql") {
@@ -35,12 +41,7 @@ export async function connect(
   }
   const pool = await new sql.ConnectionPool(options).connect();
   try {
-    if (!admin)
-      await pool
-        .request()
-        .batch(
-          "EXECUTE AS USER = 'QueryGroundStudent' WITH NO REVERT; SET NOCOUNT OFF; SET LOCK_TIMEOUT 5000;",
-        );
+    if (!admin) await pool.request().batch(studentSessionSql);
     return pool;
   } catch (error) {
     await pool.close();

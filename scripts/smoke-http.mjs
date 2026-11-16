@@ -1,5 +1,8 @@
+import { network } from "../shared/runtime.mjs";
+import { sourceUrls } from "../shared/workspace.mjs";
 import assert from "node:assert/strict";
-const base = process.env.TEST_BASE_URL || "http://127.0.0.1:3001";
+const base =
+  process.env.TEST_BASE_URL || `http://${network.host}:${network.apiPort}`;
 let checks = 0;
 async function get(path) {
   const r = await fetch(base + path);
@@ -24,9 +27,9 @@ for (const db of dbs)
   );
 const curriculum = await (await get("/api/curriculum")).json();
 assert.equal(curriculum.lessons.length, 71);
-const pages = await (await get("/materials/pages.json")).json();
+const pages = await (await get(sourceUrls.pages)).json();
 assert.equal(pages.length, 90);
-await get("/materials/sql-reference.pdf");
+await get(sourceUrls.pdf);
 async function post(path, body, headers = {}) {
   return fetch(base + path, {
     method: "POST",

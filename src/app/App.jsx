@@ -8,19 +8,16 @@ import {
 } from "react";
 import {
   Code2,
-  ArrowUpRight,
-  Database,
   CheckCircle2,
   Info,
   AlertTriangle,
-  Loader2,
   Terminal,
   BookOpen,
 } from "lucide-react";
 import Sidebar from "../components/layout/Sidebar";
 import Header from "../components/layout/Header";
 import Hero from "../components/common/Hero";
-import Modal from "../components/common/Modal";
+import WorkspaceModal from "../components/workspace/WorkspaceModal";
 import DatabaseCards from "../components/database/DatabaseCards";
 import { practiceLabel } from "../components/database/labels";
 import SchemaExplorer from "../components/database/SchemaExplorer";
@@ -35,7 +32,7 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useQueryRunner } from "../hooks/useQueryRunner";
 import { api } from "../lib/api";
 import { lessons, sourceCoverage } from "../../shared/curriculum.mjs";
-import { databases } from "../../shared/databases.mjs";
+import { databases, defaultDatabaseId } from "../../shared/databases.mjs";
 import { pickPracticeProblem } from "../../shared/practice-problems.mjs";
 import {
   readPracticeSession,
@@ -49,29 +46,33 @@ import {
   clearArchives,
   workspaceBackup,
 } from "../lib/storage";
-import { downloadText } from "../lib/export";
+import { downloadJson } from "../lib/export";
 
-import { defaultQueries as defaults } from "../../shared/workspace.mjs";
-const headings = {
-  learn: [
-    "학습 로드맵",
-    "기본 개념부터 확장 실습까지, 나만의 속도로 배워 보세요.",
-  ],
-  pdf: [
-    "PDF 문제집",
-    "90쪽의 원본 자료와 실제로 실행할 수 있는 기출 문제를 한곳에.",
-  ],
-  history: [
-    "실행 기록",
-    "실행한 SQL, 저장한 쿼리와 자동 보관 내용을 확인하세요.",
-  ],
-};
+import {
+  defaultQueries as defaults,
+  storageKeys,
+  workspaceLimits,
+  sourceUrls,
+} from "../../shared/workspace.mjs";
+import { views } from "../config/navigation";
+import { useToast } from "../hooks/useToast";
+import { useDatabaseConnection } from "../hooks/useDatabaseConnection";
+import {
+  validateBackup,
+  mergeRecords,
+  lessonQuery,
+  tablePreviewQuery,
+} from "../lib/workspace";
 export default function App() {
   const [view, setView] = useState("playground"),
-    [mobileMenu, setMobileMenu] = useState(false),
-    [health, setHealth] = useState(null);
-  const [selected, setSelected] = useLocalStorage("qg.database", "campus");
-  const database = databases.find((d) => d.id === selected) || databases[2];
+    [mobileMenu, setMobileMenu] = useState(false);
+  const [selected, setSelected] = useLocalStorage(
+    storageKeys.database,
+    defaultDatabaseId,
+  );
+  const database =
+    databases.find((d) => d.id === selected) ||
+    databases.find((d) => d.id === defaultDatabaseId);
   const [pageSession] = useState(readPracticeSession);
   const [practiceMode, setPracticeMode] = useState(true);
   const [practiceByDatabase, setPracticeByDatabase] = useState(() =>
@@ -83,13 +84,16 @@ export default function App() {
     ),
   );
   const [storedQueries, setQueries, queryStorage] = useLocalStorage(
-      "qg.queries",
+      storageKeys.queries,
       defaults,
     ),
-    [history, setHistory, historyStorage] = useLocalStorage("qg.history", []),
-    [saved, setSaved, savedStorage] = useLocalStorage("qg.saved", []),
+    [history, setHistory, historyStorage] = useLocalStorage(
+      storageKeys.history,
+      [],
+    ),
+    [saved, setSaved, savedStorage] = useLocalStorage(storageKeys.saved, []),
     [completed, setCompleted, completedStorage] = useLocalStorage(
-      "qg.completed",
+      storageKeys.completed,
       [],
     );
   const resetOnReload = pageSession.reload && pageSession.view === "playground";
@@ -113,7 +117,7 @@ export default function App() {
     savePracticeSession(view, practiceByDatabase, blankDatabases);
   }, [view, practiceByDatabase, blankDatabases]);
   const [lessonIds, setLessonIds] = useLocalStorage(
-    "qg.lessons",
+    storageKeys.lessons,
     Object.fromEntries(
       databases.map((db) => [
         db.id,
@@ -134,20 +138,22 @@ export default function App() {
     historyStorage,
     completedStorage,
   ].find((item) => ["error", "recovered"].includes(item.status));
-  const [schema, setSchema] = useState([]),
-    [schemaLoading, setSchemaLoading] = useState(true),
-    [schemaError, setSchemaError] = useState(""),
-    [schemaRevision, setSchemaRevision] = useState(0);
+  const {
+    health,
+    refreshHealth,
+    schema,
+    schemaLoading,
+    schemaError,
+    refreshSchema,
+  } = useDatabaseConnection(database.id);
+  const [toast, notify] = useToast();
   const [modal, setModal] = useState(null),
     [resetting, setResetting] = useState(false),
-    [toast, setToast] = useState(""),
     [page, setPage] = useState(1),
     [sourcePages, setSourcePages] = useState(sourceCoverage.pageCount),
     [pdfTab, setPdfTab] = useState("exercises");
   const [saveTitle, setSaveTitle] = useState("");
-  const editorRef = useRef(null),
-    toastTimer = useRef(null),
-    healthGeneration = useRef(0);
+  const editorRef = useRef(null);
   const query =
     typeof queries[database.id] === "string"
       ? queries[database.id]
@@ -159,12 +165,6 @@ export default function App() {
       );
     setQueries((q) => ({ ...q, [database.id]: value }));
   };
-  const notify = useCallback((message) => {
-    setToast(message);
-    clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(""), 3500);
-  }, []);
-  useEffect(() => () => clearTimeout(toastTimer.current), []);
   const refreshArchived = useRef(false);
   useEffect(() => {
     if (refreshArchived.current) return;
@@ -194,48 +194,9 @@ export default function App() {
     }
   }, [notify]);
   const closeMobileMenu = useCallback(() => setMobileMenu(false), []);
-  const refreshHealth = useCallback(async () => {
-    const generation = ++healthGeneration.current;
-    try {
-      const data = await api.health(database.id);
-      if (generation === healthGeneration.current) setHealth(data);
-    } catch (error) {
-      if (generation === healthGeneration.current)
-        setHealth({ ...error.body, ok: false, error: error.message });
-    }
-  }, [database.id]);
-  useEffect(() => {
-    setHealth(null);
-    refreshHealth();
-    const timer = setInterval(refreshHealth, 30000);
-    return () => {
-      clearInterval(timer);
-      healthGeneration.current++;
-    };
-  }, [refreshHealth]);
   useEffect(() => {
     let live = true;
-    setSchemaLoading(true);
-    setSchemaError("");
-    setSchema([]);
-    api
-      .schema(database.id)
-      .then((data) => {
-        if (live) setSchema(data);
-      })
-      .catch((error) => {
-        if (live) setSchemaError(error.message);
-      })
-      .finally(() => {
-        if (live) setSchemaLoading(false);
-      });
-    return () => {
-      live = false;
-    };
-  }, [database.id, schemaRevision, health?.ok]);
-  useEffect(() => {
-    let live = true;
-    fetch("/materials/pages.json")
+    fetch(sourceUrls.pages)
       .then((response) => response.json())
       .then((pages) => {
         if (live && Array.isArray(pages) && pages.length)
@@ -247,8 +208,8 @@ export default function App() {
     };
   }, []);
   const runner = useQueryRunner((item) => {
-    setHistory((items) => [item, ...items].slice(0, 100));
-    setSchemaRevision((x) => x + 1);
+    setHistory((items) => [item, ...items].slice(0, workspaceLimits.records));
+    refreshSchema();
     refreshHealth();
   });
   const switchDatabase = (id) => {
@@ -288,9 +249,7 @@ export default function App() {
       notify("실행이 끝난 후 문제를 바꿀 수 있습니다.");
       return;
     }
-    const sql = withAnswer
-      ? `-- ${item.title}\n${item.setup ? `-- 선행 실습 준비\n${item.setup}` : ""}${item.answer}`
-      : `-- ${item.title}\n-- ${item.explanation}\n\n${item.setup ? `-- 선행 실습 준비\n${item.setup}\n` : ""}-- 여기에 SQL을 작성해 보세요.\n`;
+    const sql = lessonQuery(item, withAnswer);
     if (!replaceQuery(item.database, sql)) return;
     setSelected(item.database);
     setLessonIds((current) => ({ ...current, [item.database]: item.id }));
@@ -324,7 +283,7 @@ export default function App() {
     try {
       await api.reset(database.id);
       runner.clear();
-      setSchemaRevision((x) => x + 1);
+      refreshSchema();
       notify(`${practiceLabel(database.id)} 데이터를 초기화했습니다.`);
       setModal(null);
       refreshHealth();
@@ -349,7 +308,7 @@ export default function App() {
           time: new Date().toISOString(),
         },
         ...items,
-      ].slice(0, 100),
+      ].slice(0, workspaceLimits.records),
     );
     if (success) {
       setModal(null);
@@ -363,7 +322,7 @@ export default function App() {
     try {
       await api.setup();
       await refreshHealth();
-      setSchemaRevision((x) => x + 1);
+      refreshSchema();
       notify("실습 DB 준비를 완료했습니다. 기존 데이터는 유지했습니다.");
     } catch (error) {
       notify(error.message);
@@ -372,38 +331,27 @@ export default function App() {
     }
   }
   function exportWorkspace() {
-    downloadText(
-      JSON.stringify(
-        workspaceBackup({
-          queries,
-          history,
-          saved,
-          completed,
-          lessonIds,
-          archives,
-        }),
-        null,
-        2,
-      ),
+    downloadJson(
+      workspaceBackup({
+        queries,
+        history,
+        saved,
+        completed,
+        lessonIds,
+        archives,
+      }),
       "queryground-backup.json",
-      "application/json",
     );
   }
   async function importWorkspace(file) {
     if (!file || runner.running || resetting) return;
     try {
-      if (file.size > 20 * 1024 * 1024)
-        throw new Error("백업 파일은 20MB 이하로 선택해 주세요.");
+      if (file.size > workspaceLimits.backupMegabytes * 1024 * 1024)
+        throw new Error(
+          `백업 파일은 ${workspaceLimits.backupMegabytes}MB 이하로 선택해 주세요.`,
+        );
       const data = JSON.parse(await file.text());
-      if (
-        data.version !== 1 ||
-        !data.queries ||
-        databases.some((db) => typeof data.queries[db.id] !== "string") ||
-        !["history", "saved", "completed", "archives"].every((key) =>
-          Array.isArray(data[key]),
-        )
-      )
-        throw new Error("올바른 QueryGround 백업 파일이 아닙니다.");
+      validateBackup(data);
       for (const db of databases)
         if (queries[db.id] !== data.queries[db.id])
           archiveDraft(db.id, queries[db.id], "백업 복원 전 자동 보관");
@@ -416,24 +364,8 @@ export default function App() {
       setBlankDatabases([]);
       const results = await Promise.all([
         setQueries(data.queries),
-        setHistory((items) =>
-          [
-            ...new Map(
-              [...data.history, ...items]
-                .filter((item) => item?.id)
-                .map((item) => [item.id, item]),
-            ).values(),
-          ].slice(0, 100),
-        ),
-        setSaved((items) =>
-          [
-            ...new Map(
-              [...data.saved, ...items]
-                .filter((item) => item?.id)
-                .map((item) => [item.id, item]),
-            ).values(),
-          ].slice(0, 100),
-        ),
+        setHistory((items) => mergeRecords(data.history, items)),
+        setSaved((items) => mergeRecords(data.saved, items)),
         setCompleted((items) => [...new Set([...items, ...data.completed])]),
         ...(data.lessonIds ? [setLessonIds(data.lessonIds)] : []),
       ]);
@@ -444,6 +376,19 @@ export default function App() {
       );
     } catch (error) {
       notify(error.message);
+    }
+  }
+  async function clearList() {
+    try {
+      const success =
+        modal === "clear-archives"
+          ? (clearArchives(), true)
+          : await (modal === "clear-history" ? setHistory([]) : setSaved([]));
+      if (success) setModal(null);
+      else
+        notify("목록 변경을 저장하지 못했습니다. 백업 후 다시 시도해 주세요.");
+    } catch {
+      notify("목록을 지우지 못했습니다. 브라우저 저장소를 확인해 주세요.");
     }
   }
   return (
@@ -542,13 +487,10 @@ export default function App() {
                     loading={schemaLoading}
                     error={schemaError}
                     database={database}
-                    onRefresh={() => setSchemaRevision((x) => x + 1)}
+                    onRefresh={() => refreshSchema()}
                     onInsert={(text) => editorRef.current?.insert(text)}
                     onPreview={(table) =>
-                      replaceQuery(
-                        database.id,
-                        `SELECT TOP (100) *\nFROM [${table.schema.replaceAll("]", "]]")}].[${table.name.replaceAll("]", "]]")}];`,
-                      )
+                      replaceQuery(database.id, tablePreviewQuery(table))
                     }
                     disabled={runner.running || resetting}
                   />
@@ -615,11 +557,11 @@ export default function App() {
           ) : (
             <>
               <div className="page-heading">
-                <h1>{headings[view][0]}</h1>
+                <h1>{views[view].label}</h1>
                 <p>
                   {view === "pdf"
                     ? `${sourcePages}쪽의 원본 자료와 기출 문제를 한곳에.`
-                    : headings[view][1]}
+                    : views[view].description}
                 </p>
                 {!sourceCoverage.matchesSource &&
                   ["learn", "pdf"].includes(view) && (
@@ -721,156 +663,17 @@ export default function App() {
         </div>
       )}
       {modal && (
-        <Modal
-          title={
-            modal === "reset"
-              ? "데이터베이스를 초기화할까요?"
-              : modal === "save"
-                ? "나의 쿼리 저장"
-                : modal.startsWith("clear")
-                  ? "목록을 비울까요?"
-                  : "QueryGround 시작 가이드"
-          }
+        <WorkspaceModal
+          modal={modal}
+          database={database}
+          resetting={resetting}
           onClose={() => setModal(null)}
-          locked={resetting}
-        >
-          {modal === "reset" ? (
-            <>
-              <div className="modal-db">
-                <Database size={22} />
-                <div>
-                  {practiceLabel(database.id)}
-                  <small>{database.name}</small>
-                </div>
-              </div>
-              <p>
-                선택한 실습 DB의 테이블과 실습 중 만든 객체를 초기화하고 기본
-                데이터를 다시 채웁니다. 현재 변경 사항은 사라집니다.
-              </p>
-              <p className="muted">
-                다른 DB와 브라우저에 저장한 쿼리·실행 기록은 유지됩니다. 단,
-                사용자 정의 스키마·타입과 시간 테이블도 정리합니다. 지원 범위를
-                벗어나는 객체의 의존성이 있으면 전체 초기화를 롤백하고 오류를
-                표시합니다.
-              </p>
-              <div className="modal-actions">
-                <button disabled={resetting} onClick={() => setModal(null)}>
-                  취소
-                </button>
-                <button
-                  className="primary-button"
-                  disabled={resetting}
-                  onClick={resetDatabase}
-                >
-                  {resetting && <Loader2 size={14} className="spinning" />}
-                  {resetting ? "초기화 중..." : "이 DB 초기화"}
-                </button>
-              </div>
-            </>
-          ) : modal === "save" ? (
-            <>
-              <label className="input-label">
-                쿼리 이름
-                <input
-                  autoFocus
-                  value={saveTitle}
-                  maxLength={80}
-                  placeholder="예: 부서별 평균 급여 조회"
-                  onChange={(e) => setSaveTitle(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") saveQuery();
-                  }}
-                />
-              </label>
-              <p className="muted">
-                SQL과 선택된 데이터베이스를 이 브라우저에 저장합니다.
-              </p>
-              <div className="modal-actions">
-                <button onClick={() => setModal(null)}>취소</button>
-                <button className="primary-button" onClick={saveQuery}>
-                  저장하기
-                </button>
-              </div>
-            </>
-          ) : modal.startsWith("clear") ? (
-            <>
-              <p>
-                {modal === "clear-history"
-                  ? "실행 기록"
-                  : modal === "clear-archives"
-                    ? "자동 보관"
-                    : "저장한 쿼리"}{" "}
-                목록을 이 브라우저에서 삭제합니다. 데이터베이스의 데이터는
-                유지됩니다.
-              </p>
-              <div className="modal-actions">
-                <button onClick={() => setModal(null)}>취소</button>
-                <button
-                  className="primary-button"
-                  onClick={async () => {
-                    try {
-                      const success =
-                        modal === "clear-archives"
-                          ? (clearArchives(), true)
-                          : await (modal === "clear-history"
-                              ? setHistory([])
-                              : setSaved([]));
-                      if (success) setModal(null);
-                      else
-                        notify(
-                          "목록 변경을 저장하지 못했습니다. 백업 후 다시 시도해 주세요.",
-                        );
-                    } catch {
-                      notify(
-                        "목록을 지우지 못했습니다. 브라우저 저장소를 확인해 주세요.",
-                      );
-                    }
-                  }}
-                >
-                  목록 비우기
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="help-content">
-              <p>React와 실제 SQL Server가 연결된 개인용 실습실입니다.</p>
-              <ol>
-                <li>
-                  <strong>DB 선택</strong>
-                  <span>직원 정보·주문 정보·학생 성적 중 하나를 고르세요.</span>
-                </li>
-                <li>
-                  <strong>쿼리 작성과 실행</strong>
-                  <span>
-                    탐색기의 테이블을 조회하거나 SQL을 직접 입력하고 Ctrl +
-                    Enter를 누르세요. 선택한 SQL만 실행할 수도 있습니다.
-                  </span>
-                </li>
-                <li>
-                  <strong>문제 풀고 복습</strong>
-                  <span>
-                    학습 로드맵과 PDF 문제집에서 문제·설명·정답·주의사항을
-                    확인하고 스스로 완료 체크를 해보세요.
-                  </span>
-                </li>
-              </ol>
-              <div className="help-setup">
-                <strong>로컬 서버 시작</strong>
-                <pre>npm.cmd ci{"\n"}npm.cmd run dev</pre>
-                <p>
-                  기본 주소는 http://127.0.0.1:5173입니다. Live Server(5500)
-                  대신 이 주소를 사용하세요. 연결 변경은 .env.example을 .env로
-                  복사한 뒤 SQL_SERVER와 인증 방식을 수정하세요.
-                </p>
-              </div>
-              <p className="muted">
-                각 실행은 독립 연결입니다. BEGIN TRAN과 COMMIT/ROLLBACK은 한
-                번에 실행하세요. 서버 관리 명령과 다른 DB 접근은 제한됩니다.
-                현재 브라우저에 진행도·쿼리·최대 100개 기록을 저장합니다.
-              </p>
-            </div>
-          )}
-        </Modal>
+          resetDatabase={resetDatabase}
+          saveQuery={saveQuery}
+          saveTitle={saveTitle}
+          setSaveTitle={setSaveTitle}
+          onClear={clearList}
+        />
       )}
     </div>
   );

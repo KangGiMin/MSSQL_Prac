@@ -1,3 +1,4 @@
+import { resultsPageSize as pageSize } from "../../config/workbench";
 import { useState, useEffect } from "react";
 import {
   Table2,
@@ -9,7 +10,7 @@ import {
   Clock3,
   Loader2,
 } from "lucide-react";
-import { downloadCsv, downloadText } from "../../lib/export";
+import { downloadCsv, downloadJson } from "../../lib/export";
 export default function QueryResults({ result, running, canceling }) {
   const [tab, setTab] = useState("results"),
     [index, setIndex] = useState(0),
@@ -19,8 +20,7 @@ export default function QueryResults({ result, running, canceling }) {
     setPage(0);
     setTab(result?.error ? "messages" : "results");
   }, [result]);
-  const recordset = result?.recordsets?.[index],
-    pageSize = 100;
+  const recordset = result?.recordsets?.[index];
   return (
     <section className="results-panel" aria-live="polite">
       <div className="results-toolbar">
@@ -86,13 +86,7 @@ export default function QueryResults({ result, running, canceling }) {
         <button
           className="text-button"
           disabled={!recordset}
-          onClick={() =>
-            downloadText(
-              JSON.stringify(recordset, null, 2),
-              "query-result.json",
-              "application/json",
-            )
-          }
+          onClick={() => downloadJson(recordset, "query-result.json")}
         >
           JSON
         </button>

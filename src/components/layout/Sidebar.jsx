@@ -8,12 +8,18 @@ import {
   ArrowUpRight,
   X,
 } from "lucide-react";
-const items = [
-  ["playground", Code2, "자유 실습"],
-  ["learn", BookOpen, "학습 로드맵"],
-  ["pdf", FileText, "PDF 문제집"],
-  ["history", History, "실행 기록"],
-];
+import { views } from "../../config/navigation";
+const icons = {
+  playground: Code2,
+  learn: BookOpen,
+  pdf: FileText,
+  history: History,
+};
+const items = Object.entries(views).map(([id, { label }]) => [
+  id,
+  icons[id],
+  label,
+]);
 export default function Sidebar({
   view,
   onNavigate,

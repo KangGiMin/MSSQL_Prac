@@ -1,3 +1,5 @@
+import { clientUrl } from "./shared/runtime.mjs";
+
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
@@ -9,14 +11,14 @@ export default defineConfig({
   outputDir: "tmp/playwright-results",
   reporter: [["list"]],
   use: {
-    baseURL: process.env.TEST_BASE_URL || "http://127.0.0.1:5173",
+    baseURL: process.env.TEST_BASE_URL || clientUrl(),
     channel: process.env.BROWSER_CHANNEL || "chrome",
     headless: true,
     trace: "retain-on-failure",
   },
   webServer: {
     command: "npm.cmd run dev",
-    url: process.env.TEST_BASE_URL || "http://127.0.0.1:5173",
+    url: process.env.TEST_BASE_URL || clientUrl(),
     reuseExistingServer: !process.env.CI,
     timeout: 60000,
   },

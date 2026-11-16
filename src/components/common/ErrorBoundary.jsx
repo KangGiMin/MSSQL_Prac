@@ -1,5 +1,5 @@
 import { Component } from "react";
-import { downloadText } from "../../lib/export";
+import { downloadJson } from "../../lib/export";
 import { workspaceBackup } from "../../lib/storage";
 
 export default class ErrorBoundary extends Component {
@@ -11,11 +11,7 @@ export default class ErrorBoundary extends Component {
     console.error("화면 오류:", error);
   }
   backup = () => {
-    downloadText(
-      JSON.stringify(workspaceBackup(), null, 2),
-      "queryground-recovery.json",
-      "application/json",
-    );
+    downloadJson(workspaceBackup(), "queryground-recovery.json");
   };
   render() {
     if (!this.state.error) return this.props.children;

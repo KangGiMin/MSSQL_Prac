@@ -1,3 +1,5 @@
+import { network } from "../shared/runtime.mjs";
+import { queryLimits } from "./config/limits.mjs";
 import express from "express";
 import path from "node:path";
 import fs from "node:fs";
@@ -13,7 +15,7 @@ app.use(createAccessControl());
 app.get("/healthz", (_req, res) => res.json({ ok: true }));
 app.use((req, res, next) => {
   if (
-    req.path.startsWith("/api") &&
+    req.path.startsWith(network.apiPrefix) &&
     !["GET", "HEAD"].includes(req.method) &&
     !req.is("application/json")
   )
@@ -22,9 +24,9 @@ app.use((req, res, next) => {
       .json({ error: "application/json 요청만 허용합니다." });
   next();
 });
-app.use(express.json({ limit: "256kb" }));
-app.use("/api", api);
-app.use("/api", (_req, res) =>
+app.use(express.json({ limit: queryLimits.requestBody }));
+app.use(network.apiPrefix, api);
+app.use(network.apiPrefix, (_req, res) =>
   res.status(404).json({ error: "존재하지 않는 API입니다." }),
 );
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");

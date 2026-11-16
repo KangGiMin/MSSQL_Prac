@@ -1,3 +1,4 @@
+import { sourceFiles } from "../shared/workspace.mjs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
@@ -5,13 +6,13 @@ import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 
 const source = process.argv[2];
 if (!source) throw new Error('사용법: npm run pdf:import -- "PDF 절대 경로"');
-const output = path.resolve(process.argv[3] || "public/materials");
+const output = path.resolve(process.argv[3] || sourceFiles.directory);
 const manifestPath =
-  output === path.resolve("public/materials")
+  output === path.resolve(sourceFiles.directory)
     ? path.resolve("shared/source-manifest.json")
-    : path.join(output, "manifest.json");
+    : path.join(output, sourceFiles.manifest);
 const destinationFor = (name) =>
-  name === "manifest.json" ? manifestPath : path.join(output, name);
+  name === sourceFiles.manifest ? manifestPath : path.join(output, name);
 const sourceBytes = await fs.readFile(source);
 const task = getDocument({
   data: new Uint8Array(sourceBytes),
@@ -46,9 +47,9 @@ const manifest = {
 };
 await fs.mkdir(output, { recursive: true });
 const files = new Map([
-  ["sql-reference.pdf", sourceBytes],
-  ["pages.json", Buffer.from(JSON.stringify(pages, null, 2) + "\n")],
-  ["manifest.json", Buffer.from(JSON.stringify(manifest, null, 2) + "\n")],
+  [sourceFiles.pdf, sourceBytes],
+  [sourceFiles.pages, Buffer.from(JSON.stringify(pages, null, 2) + "\n")],
+  [sourceFiles.manifest, Buffer.from(JSON.stringify(manifest, null, 2) + "\n")],
 ]);
 for (const name of files.keys()) {
   try {

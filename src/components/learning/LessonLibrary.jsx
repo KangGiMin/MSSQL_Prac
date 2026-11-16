@@ -1,3 +1,4 @@
+import SegmentedTabs from "../common/SegmentedTabs";
 import { useState } from "react";
 import {
   Search,
@@ -29,40 +30,29 @@ export default function LessonLibrary({
   return (
     <div className="library">
       <div className="library-controls">
-        <div className="segmented">
-          <button
-            className={filter === "concept" ? "active" : ""}
-            aria-pressed={filter === "concept"}
-            onClick={() => {
-              setFilter("concept");
-              setCategory("전체");
-            }}
-          >
-            <BookOpen size={15} />
-            개념 {coverage.concepts}
-          </button>
-          <button
-            className={filter === "exercise" ? "active" : ""}
-            aria-pressed={filter === "exercise"}
-            onClick={() => {
-              setFilter("exercise");
-              setCategory("전체");
-            }}
-          >
-            <Code2 size={15} />
-            기출 {coverage.exercises}
-          </button>
-          <button
-            className={filter === "advanced" ? "active" : ""}
-            aria-pressed={filter === "advanced"}
-            onClick={() => {
-              setFilter("advanced");
-              setCategory("전체");
-            }}
-          >
-            확장 실습 {coverage.advanced}
-          </button>
-        </div>
+        <SegmentedTabs
+          items={[
+            {
+              id: "concept",
+              label: "개념",
+              icon: BookOpen,
+              count: coverage.concepts,
+            },
+            {
+              id: "exercise",
+              label: "기출",
+              icon: Code2,
+              count: coverage.exercises,
+            },
+            { id: "advanced", label: "확장 실습", count: coverage.advanced },
+          ]}
+          value={filter}
+          pressed
+          onChange={(next) => {
+            setFilter(next);
+            setCategory("전체");
+          }}
+        />
         <div className="library-search">
           <Search size={16} />
           <input

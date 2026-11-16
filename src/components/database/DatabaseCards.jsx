@@ -6,7 +6,11 @@ import {
   Database,
 } from "lucide-react";
 import { practiceData } from "./labels";
-const icons = { company: Building2, store: ShoppingBag, campus: GraduationCap };
+const icons = {
+  building: Building2,
+  shopping: ShoppingBag,
+  graduation: GraduationCap,
+};
 export default function DatabaseCards({
   databases,
   selected,
@@ -28,7 +32,7 @@ export default function DatabaseCards({
         aria-label="연습 데이터 선택"
       >
         {databases.map((db) => {
-          const Icon = icons[db.id] || Database;
+          const Icon = icons[db.icon] || Database;
           const presentation = practiceData[db.id] || {
             name: db.label,
             description: db.subtitle,

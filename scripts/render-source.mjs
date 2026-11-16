@@ -1,7 +1,11 @@
+import path from "node:path";
+import { sourceFiles } from "../shared/workspace.mjs";
 import fs from "node:fs/promises";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 const task = getDocument({
-  data: new Uint8Array(await fs.readFile("public/materials/sql-reference.pdf")),
+  data: new Uint8Array(
+    await fs.readFile(path.join(sourceFiles.directory, sourceFiles.pdf)),
+  ),
   useSystemFonts: true,
   isEvalSupported: false,
 });

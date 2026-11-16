@@ -3,11 +3,11 @@ import CodeMirror from "@uiw/react-codemirror";
 import { sql, MSSQL } from "@codemirror/lang-sql";
 import { EditorView, keymap } from "@codemirror/view";
 import { Prec } from "@codemirror/state";
-import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import {
-  oneDarkTheme,
-  oneDarkHighlightStyle,
-} from "@codemirror/theme-one-dark";
+  sqlBlueTheme,
+  editorAppearance,
+  editorSetup,
+} from "../../config/editor";
 import {
   Play,
   Square,
@@ -17,18 +17,6 @@ import {
   CornerDownLeft,
 } from "lucide-react";
 
-const sqlBlueTheme = [
-  oneDarkTheme,
-  syntaxHighlighting(
-    HighlightStyle.define(
-      oneDarkHighlightStyle.specs.map((rule) =>
-        rule.color === "#c678dd"
-          ? { ...rule, color: "var(--accent-text)" }
-          : rule,
-      ),
-    ),
-  ),
-];
 export default function QueryEditor({
   value,
   onChange,
@@ -73,36 +61,17 @@ export default function QueryEditor({
       }),
       EditorView.lineWrapping,
       Prec.highest(
-        keymap.of([
-          {
-            key: "Mod-Enter",
+        keymap.of(
+          ["Mod-Enter", "F5"].map((key) => ({
+            key,
             run: () => {
               runSelection();
               return true;
             },
-          },
-          {
-            key: "F5",
-            run: () => {
-              runSelection();
-              return true;
-            },
-          },
-        ]),
+          })),
+        ),
       ),
-      EditorView.theme({
-        "&": { fontSize: "13px", backgroundColor: "#15171f" },
-        ".cm-scroller": { fontFamily: 'Consolas, "SFMono-Regular", monospace' },
-        ".cm-gutters": {
-          backgroundColor: "#15171f",
-          border: "none",
-          color: "#505563",
-        },
-        ".cm-content": { paddingTop: "20px" },
-        ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--accent)" },
-        ".cm-activeLine": { backgroundColor: "#ffffff03" },
-        ".cm-activeLineGutter": { backgroundColor: "transparent" },
-      }),
+      editorAppearance,
     ],
     [schema, runSelection],
   );
@@ -187,12 +156,7 @@ export default function QueryEditor({
         theme={sqlBlueTheme}
         extensions={extensions}
         editable={!running && !resetting}
-        basicSetup={{
-          foldGutter: false,
-          highlightActiveLine: false,
-          autocompletion: true,
-          bracketMatching: true,
-        }}
+        basicSetup={editorSetup}
         aria-label="SQL 쿼리 편집기"
       />
       <div className="editor-status">

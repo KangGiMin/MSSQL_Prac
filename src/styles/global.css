@@ -5,7 +5,7 @@
 :root {
   font-family: Inter, "Segoe UI", "Malgun Gothic", sans-serif;
   color: #e9e9ee;
-  background: #101116;
+  background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -21,6 +21,12 @@
   --accent-surface: #142b3e;
   --accent-gradient: linear-gradient(135deg, #1479ed, #21c3ed);
   --green: #85d8b4;
+  --text-subtle: #929baa;
+  --text-secondary: #a2a9b7;
+  --surface-raised: #191b23;
+  --border-strong: #30313d;
+  --overlay: #0008;
+  --editor-bg: #15171f;
   --sidebar: 216px;
   font-size: 14px;
   color-scheme: dark;
@@ -207,7 +213,7 @@ kbd {
 }
 .section-heading > span {
   font-size: 12px;
-  color: #9aa2b1;
+  color: var(--muted);
 }
 .primary-button {
   display: inline-flex;
@@ -257,7 +263,7 @@ kbd {
   gap: 10px;
   background: var(--accent-surface);
   border: 1px solid #597b8f;
-  box-shadow: 0 8px 40px #0008;
+  box-shadow: 0 8px 40px var(--overlay);
   padding: 14px 22px;
   border-radius: 10px;
   max-width: 80vw;
@@ -274,7 +280,7 @@ kbd {
   border: 1px solid #39454c;
   padding: 24px;
   border-radius: 10px;
-  box-shadow: 0 16px 48px #0008;
+  box-shadow: 0 16px 48px var(--overlay);
 }
 .modal::backdrop {
   background: #080910b3;

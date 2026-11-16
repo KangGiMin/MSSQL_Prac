@@ -1,10 +1,9 @@
+import { clientUrl } from "../shared/runtime.mjs";
 import { spawn } from "node:child_process";
 import { config } from "../server/config/env.mjs";
 import fs from "node:fs/promises";
 
-const base =
-  process.env.TEST_BASE_URL ||
-  `http://127.0.0.1:${process.env.CLIENT_PORT || 5173}`;
+const base = process.env.TEST_BASE_URL || clientUrl(process.env);
 let development;
 async function run(args) {
   const child = spawn(process.execPath, args, {

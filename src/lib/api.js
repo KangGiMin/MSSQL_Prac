@@ -1,5 +1,6 @@
+import { network } from "../../shared/runtime.mjs";
 export async function request(path, options = {}) {
-  const response = await fetch(`/api${path}`, {
+  const response = await fetch(`${network.apiPrefix}${path}`, {
     ...options,
     headers: { "Content-Type": "application/json", ...options.headers },
   });
@@ -19,6 +20,9 @@ export async function request(path, options = {}) {
     );
   return body;
 }
+const post = (path, body, options = {}) =>
+  request(path, { method: "POST", body: JSON.stringify(body), ...options });
+
 export const api = {
   health: (database, signal) =>
     request(
@@ -26,22 +30,11 @@ export const api = {
       { signal },
     ),
   databases: () => request("/databases"),
-  setup: () =>
-    request("/setup", {
-      method: "POST",
-      body: JSON.stringify({ confirm: "setup" }),
-    }),
+  setup: () => post("/setup", { confirm: "setup" }),
   curriculum: () => request("/curriculum"),
   schema: (id) => request(`/databases/${id}/schema`),
   query: (database, sql, signal) =>
-    request("/query", {
-      method: "POST",
-      body: JSON.stringify({ database, sql }),
-      signal,
-    }),
+    post("/query", { database, sql }, { signal }),
   reset: (database) =>
-    request(`/databases/${database}/reset`, {
-      method: "POST",
-      body: JSON.stringify({ confirm: database }),
-    }),
+    post(`/databases/${database}/reset`, { confirm: database }),
 };

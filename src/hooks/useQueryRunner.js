@@ -1,3 +1,4 @@
+import { timing } from "../config/workbench";
 import { useState, useRef, useEffect } from "react";
 import { api } from "../lib/api";
 export function useQueryRunner(onComplete) {
@@ -38,15 +39,24 @@ export function useQueryRunner(onComplete) {
         error: { message },
       });
       if (error.name === "AbortError") {
-        const deadline = Date.now() + 4000;
+        const deadline = Date.now() + timing.cancelWaitMs;
         while (Date.now() < deadline) {
           try {
-            if (!(await api.health(database, AbortSignal.timeout(1000))).busy)
+            if (
+              !(
+                await api.health(
+                  database,
+                  AbortSignal.timeout(timing.cancelHealthTimeoutMs),
+                )
+              ).busy
+            )
               break;
           } catch {
             break;
           }
-          await new Promise((resolve) => setTimeout(resolve, 100));
+          await new Promise((resolve) =>
+            setTimeout(resolve, timing.cancelPollMs),
+          );
         }
       }
       onComplete?.({

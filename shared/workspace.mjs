@@ -1,3 +1,30 @@
+export const storagePrefix = "qg.";
+export const storageKeys = Object.fromEntries(
+  ["database", "queries", "history", "saved", "completed", "lessons"].map(
+    (name) => [name, storagePrefix + name],
+  ),
+);
+export const archivePrefix = storagePrefix + "archive.";
+export const recoveryPrefix = storagePrefix + "recovered.";
+export const practiceSessionKey = storagePrefix + "practice-session";
+export const backupVersion = 1;
+export const workspaceLimits = {
+  records: 100,
+  backupMegabytes: 20,
+  queryTitleLength: 80,
+};
+
+export const sourceFiles = {
+  directory: "public/materials",
+  pdf: "sql-reference.pdf",
+  pages: "pages.json",
+  manifest: "manifest.json",
+};
+export const sourceUrls = {
+  pdf: `/materials/${sourceFiles.pdf}`,
+  pages: `/materials/${sourceFiles.pages}`,
+};
+
 export const defaultQueries = {
   company:
     "-- 사원 테이블에서 첫 번째 데이터를 만나 보세요.\nSELECT *\nFROM dbo.EMP;\n",

@@ -1,3 +1,5 @@
+export const defaultDatabaseId = "campus";
+
 export const databases = [
   {
     id: "company",

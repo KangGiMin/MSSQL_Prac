@@ -1,3 +1,4 @@
+import SegmentedTabs from "../common/SegmentedTabs";
 import { useState, useRef } from "react";
 import { practiceLabel } from "../database/labels";
 import {
@@ -21,33 +22,38 @@ export default function HistoryList({
   onClear,
 }) {
   const [tab, setTab] = useState("history");
-  const data = tab === "history" ? history : tab === "saved" ? saved : archives;
+  const tabs = [
+    {
+      id: "history",
+      label: "실행 기록",
+      icon: History,
+      data: history,
+      empty: "아직 실행 기록이 없습니다",
+    },
+    {
+      id: "saved",
+      label: "저장한 쿼리",
+      icon: Bookmark,
+      data: saved,
+      empty: "저장한 쿼리가 없습니다",
+    },
+    {
+      id: "archives",
+      label: "자동 보관",
+      data: archives,
+      empty: "자동 보관한 SQL이 없습니다",
+    },
+  ];
+  const { data, empty } = tabs.find((item) => item.id === tab);
   const input = useRef(null);
   return (
     <section className="history-page">
       <div className="library-controls">
-        <div className="segmented">
-          <button
-            className={tab === "history" ? "active" : ""}
-            onClick={() => setTab("history")}
-          >
-            <History size={15} />
-            실행 기록 {history.length}
-          </button>
-          <button
-            className={tab === "saved" ? "active" : ""}
-            onClick={() => setTab("saved")}
-          >
-            <Bookmark size={15} />
-            저장한 쿼리 {saved.length}
-          </button>
-          <button
-            className={tab === "archives" ? "active" : ""}
-            onClick={() => setTab("archives")}
-          >
-            자동 보관 {archives.length}
-          </button>
-        </div>
+        <SegmentedTabs
+          items={tabs.map((item) => ({ ...item, count: item.data.length }))}
+          value={tab}
+          onChange={setTab}
+        />
         <div className="backup-actions">
           <button className="text-button" onClick={onExport}>
             전체 백업
@@ -86,13 +92,7 @@ export default function HistoryList({
       {!data.length ? (
         <div className="result-empty">
           <History size={28} />
-          <strong>
-            {tab === "history"
-              ? "아직 실행 기록이 없습니다"
-              : tab === "archives"
-                ? "자동 보관한 SQL이 없습니다"
-                : "저장한 쿼리가 없습니다"}
-          </strong>
+          <strong>{empty}</strong>
           <p>실습실에서 쿼리를 실행하거나 저장해 보세요.</p>
         </div>
       ) : (

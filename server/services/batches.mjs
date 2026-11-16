@@ -1,3 +1,4 @@
+import { queryLimits } from "../config/limits.mjs";
 import { httpError } from "./errors.mjs";
 // GO is a client batch separator. Ignore separators inside strings, identifiers, and comments.
 export function splitBatches(source) {
@@ -48,7 +49,9 @@ export function splitBatches(source) {
     }
   }
   if (buffer.trim()) batches.push(buffer.trim());
-  if (batches.length > 30)
-    throw httpError("한 번에 최대 30개 배치까지 실행할 수 있습니다.");
+  if (batches.length > queryLimits.batches)
+    throw httpError(
+      `한 번에 최대 ${queryLimits.batches}개 배치까지 실행할 수 있습니다.`,
+    );
   return batches;
 }

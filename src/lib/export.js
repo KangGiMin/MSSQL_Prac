@@ -1,3 +1,4 @@
+import { timing } from "../config/workbench.js";
 export function buildCsv(recordset) {
   const quote = (value) => {
     if (value === null || value === undefined) return "\\N";
@@ -30,7 +31,7 @@ export function downloadText(
   document.body.append(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setTimeout(() => URL.revokeObjectURL(url), timing.downloadRevokeMs);
 }
 
 export function downloadCsv(recordset) {
@@ -39,4 +40,8 @@ export function downloadCsv(recordset) {
     `query-result-${Date.now()}.csv`,
     "text/csv;charset=utf-8;",
   );
+}
+
+export function downloadJson(value, filename) {
+  downloadText(JSON.stringify(value, null, 2), filename, "application/json");
 }

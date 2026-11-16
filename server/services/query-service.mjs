@@ -1,3 +1,4 @@
+import { queryLimits, connectionLimits } from "../config/limits.mjs";
 import { performance } from "node:perf_hooks";
 import { connect } from "../db/connection.mjs";
 import { config } from "../config/env.mjs";
@@ -65,8 +66,10 @@ export async function executeQuery(database, source, signal) {
     e.status = 400;
     throw e;
   }
-  if (source.length > 50000) {
-    const e = new Error("SQL은 50,000자 이하로 입력해 주세요.");
+  if (source.length > queryLimits.sourceLength) {
+    const e = new Error(
+      `SQL은 ${queryLimits.sourceLength.toLocaleString("en-US")}자 이하로 입력해 주세요.`,
+    );
     e.status = 400;
     throw e;
   }
@@ -129,12 +132,16 @@ export async function executeQuery(database, source, signal) {
             result.messages.push(
               `결과 열은 ${config.maxColumns}개까지 지원합니다. ${batchNumber}번 배치의 넓은 결과는 생략했습니다.`,
             );
-          } else if (result.recordsets.length < 20)
+          } else if (result.recordsets.length < queryLimits.recordsets)
             result.recordsets.push(current);
           else if (
-            !result.messages.includes("결과 테이블은 최대 20개까지 표시합니다.")
+            !result.messages.includes(
+              `결과 테이블은 최대 ${queryLimits.recordsets}개까지 표시합니다.`,
+            )
           )
-            result.messages.push("결과 테이블은 최대 20개까지 표시합니다.");
+            result.messages.push(
+              `결과 테이블은 최대 ${queryLimits.recordsets}개까지 표시합니다.`,
+            );
         });
         request.on("row", (row) => {
           if (!current) return;
@@ -157,7 +164,7 @@ export async function executeQuery(database, source, signal) {
                   ? Buffer.byteLength(value)
                   : Buffer.isBuffer(value)
                     ? value.length * 2
-                    : 32),
+                    : queryLimits.estimatedCellBytes),
               0,
             );
             if (usedBytes + estimated > config.maxBytes) {
@@ -180,10 +187,12 @@ export async function executeQuery(database, source, signal) {
           }
         });
         request.on("rowsaffected", (count) => {
-          if (result.rowsAffected.length < 100) result.rowsAffected.push(count);
+          if (result.rowsAffected.length < queryLimits.affectedCounts)
+            result.rowsAffected.push(count);
         });
         request.on("info", (info) => {
-          if (result.messages.length < 100) result.messages.push(info.message);
+          if (result.messages.length < queryLimits.messages)
+            result.messages.push(info.message);
         });
         await request.batch(batches[batchIndex]);
         if (streamError) throw streamError;
@@ -201,7 +210,7 @@ export async function executeQuery(database, source, signal) {
       signal?.removeEventListener("abort", cancel);
       try {
         const request = pool?.request();
-        if (request) request.timeout = 2000;
+        if (request) request.timeout = connectionLimits.cleanupMs;
         const cleanup =
           request &&
           (await request.batch(

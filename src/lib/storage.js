@@ -1,17 +1,25 @@
 import { databases } from "../../shared/databases.mjs";
-import { defaultQueries } from "../../shared/workspace.mjs";
+import {
+  defaultQueries,
+  storageKeys,
+  storagePrefix,
+  archivePrefix,
+  recoveryPrefix,
+  backupVersion,
+  workspaceLimits,
+} from "../../shared/workspace.mjs";
 
 const ids = databases.map((db) => db.id);
 const stores = new Map();
 const localEvents = new EventTarget();
-const archivePrefix = "qg.archive.";
 const tabId = typeof crypto !== "undefined" ? crypto.randomUUID() : "server";
 const isObject = (value) =>
   value && typeof value === "object" && !Array.isArray(value);
 
 export function normalizeStoredValue(key, value, initial) {
-  if (key === "qg.database") return ids.includes(value) ? value : initial;
-  if (key === "qg.queries" || key === "qg.lessons")
+  if (key === storageKeys.database)
+    return ids.includes(value) ? value : initial;
+  if (key === storageKeys.queries || key === storageKeys.lessons)
     return Object.fromEntries(
       ids.map((id) => [
         id,
@@ -20,7 +28,7 @@ export function normalizeStoredValue(key, value, initial) {
           : initial[id],
       ]),
     );
-  if (key === "qg.completed")
+  if (key === storageKeys.completed)
     return [
       ...new Set(
         Array.isArray(value)
@@ -28,7 +36,7 @@ export function normalizeStoredValue(key, value, initial) {
           : [],
       ),
     ];
-  if (["qg.history", "qg.saved"].includes(key)) {
+  if ([storageKeys.history, storageKeys.saved].includes(key)) {
     return (Array.isArray(value) ? value : [])
       .filter(
         (item) =>
@@ -39,7 +47,7 @@ export function normalizeStoredValue(key, value, initial) {
           typeof item.time === "string" &&
           Number.isFinite(Date.parse(item.time)),
       )
-      .slice(0, 100)
+      .slice(0, workspaceLimits.records)
       .map((item) => ({
         ...item,
         title: typeof item.title === "string" ? item.title : undefined,
@@ -65,7 +73,10 @@ function readValue(key, initial) {
   let backupFailed = false;
   if (recovered) {
     try {
-      localStorage.setItem(`qg.recovered.${key}.${crypto.randomUUID()}`, raw);
+      localStorage.setItem(
+        `${recoveryPrefix}${key}.${crypto.randomUUID()}`,
+        raw,
+      );
       localStorage.setItem(key, JSON.stringify(value));
     } catch {
       backupFailed = true;
@@ -112,15 +123,16 @@ export function workspaceBackup(overrides = {}) {
   const rawStorage = {};
   try {
     for (const key of Object.keys(localStorage))
-      if (key.startsWith("qg.")) rawStorage[key] = localStorage.getItem(key);
+      if (key.startsWith(storagePrefix))
+        rawStorage[key] = localStorage.getItem(key);
   } catch {}
   return {
-    version: 1,
-    queries: read("qg.queries", defaultQueries),
-    history: read("qg.history", []),
-    saved: read("qg.saved", []),
-    completed: read("qg.completed", []),
-    lessonIds: read("qg.lessons", {}),
+    version: backupVersion,
+    queries: read(storageKeys.queries, defaultQueries),
+    history: read(storageKeys.history, []),
+    saved: read(storageKeys.saved, []),
+    completed: read(storageKeys.completed, []),
+    lessonIds: read(storageKeys.lessons, {}),
     archives: readArchives(),
     ...overrides,
     rawStorage,
@@ -153,7 +165,7 @@ export function readArchives() {
       .flatMap((key) => {
         try {
           return normalizeStoredValue(
-            "qg.saved",
+            storageKeys.saved,
             [JSON.parse(localStorage.getItem(key))],
             [],
           );
@@ -233,7 +245,7 @@ export function getPersistentStore(key, initial) {
   const rememberFailure = (update) => {
     const previous = committed;
     committed = normalizeStoredValue(key, update(committed), initial);
-    if (key === "qg.queries" || key === "qg.lessons") {
+    if (key === storageKeys.queries || key === storageKeys.lessons) {
       for (const id of ids)
         if (previous[id] !== committed[id]) failedFields[id] = committed[id];
       // Keep only the latest unsaved value per DB, rather than every keystroke's SQL.
@@ -271,7 +283,7 @@ export function getPersistentStore(key, initial) {
             operation.update(latest),
             initial,
           );
-          if (key === "qg.queries")
+          if (key === storageKeys.queries)
             for (const id of ids) {
               if (
                 next[id] !== latest[id] &&
@@ -332,7 +344,7 @@ export function getPersistentStore(key, initial) {
   if (typeof window !== "undefined")
     window.addEventListener("storage", (event) => {
       if (
-        key !== "qg.database" &&
+        key !== storageKeys.database &&
         (event.key === key || event.key === null) &&
         !pending.length &&
         !memoryOnly

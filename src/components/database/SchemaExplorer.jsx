@@ -1,3 +1,5 @@
+import { initiallyExpandedTables } from "../../config/workbench";
+import { quoteIdentifier } from "../../lib/workspace";
 import { useState } from "react";
 import { practiceLabel } from "./labels";
 import {
@@ -21,10 +23,9 @@ export default function SchemaExplorer({
   onPreview,
   disabled,
 }) {
-  const [expanded, setExpanded] = useState({
-      "dbo.exam": true,
-      "dbo.EMP": true,
-    }),
+  const [expanded, setExpanded] = useState(() =>
+      Object.fromEntries(initiallyExpandedTables.map((name) => [name, true])),
+    ),
     [search, setSearch] = useState("");
   return (
     <section className="schema-panel">
@@ -105,9 +106,7 @@ export default function SchemaExplorer({
                       <button
                         key={c.name}
                         title={`${c.type}${c.nullable ? " · NULL 허용" : " · NOT NULL"}${c.identity ? " · IDENTITY" : ""}${c.defaultValue ? ` · DEFAULT ${c.defaultValue}` : ""}${c.checks ? ` · CHECK ${c.checks}` : ""}${c.references?.length ? " · → " + c.references.map((f) => `${f.schema}.${f.table}.${f.column} (DELETE ${f.onDelete}, UPDATE ${f.onUpdate})`).join(", ") : ""}`}
-                        onClick={() =>
-                          onInsert(`[${c.name.replaceAll("]", "]]")}]`)
-                        }
+                        onClick={() => onInsert(quoteIdentifier(c.name))}
                         disabled={disabled}
                       >
                         <span className={c.primary ? "column-key" : ""}>

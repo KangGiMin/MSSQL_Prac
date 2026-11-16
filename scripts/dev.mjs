@@ -1,3 +1,4 @@
+import { network } from "../shared/runtime.mjs";
 import { spawn } from "node:child_process";
 import { watch, existsSync } from "node:fs";
 import { describeError } from "../server/services/errors.mjs";
@@ -46,7 +47,7 @@ function start(args, isApi = false) {
   return child;
 }
 api = start(["server/index.mjs"], true);
-start(["node_modules/vite/bin/vite.js", "--host", "127.0.0.1"]);
+start(["node_modules/vite/bin/vite.js", "--host", network.host]);
 const restart = () => {
   clearTimeout(restartTimer);
   restartTimer = setTimeout(() => {

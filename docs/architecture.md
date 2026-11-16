@@ -1,5 +1,7 @@
 ﻿# 구조와 데이터 흐름
 
+공통 설정·제한값과 파일별 코드 정리 내역은 [하드 코딩 점검과 코드 정리](refactoring.md)를 참고하세요.
+
 ```mermaid
 flowchart LR
   User[React 실습실] --> Editor[QueryEditor]
