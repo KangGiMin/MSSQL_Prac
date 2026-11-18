@@ -1,6 +1,4 @@
 import SegmentedTabs from "../common/SegmentedTabs";
-import { browserSql } from "../../config/runtime";
-import { browserLessonLimits } from "../../config/browserSupport";
 import { useState } from "react";
 import {
   Search,
@@ -101,9 +99,6 @@ export default function LessonLibrary({
               </div>
               <p>{lesson.explanation}</p>
               <footer>
-                {browserSql && browserLessonLimits[lesson.id] && (
-                  <span className="correction-label">SQL Server 실습 필요</span>
-                )}
                 <span className="lesson-category">
                   {lesson.category} · {lesson.level}
                 </span>

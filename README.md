@@ -2,15 +2,15 @@
 
 ## 사이트 바로 접속
 
-### [▶ SQL 실습 시작하기](https://kanggimin.github.io/MSSQL_Prac/)
+### [▶ MSSQL 학습 사이트 열기](https://kanggimin.github.io/MSSQL_Prac/)
 
-위 주소를 클릭하면 설치·회원가입·터미널 실행 없이 바로 실습할 수 있습니다. GitHub Pages에서 제공하므로 프로젝트 소유자의 PC와 VS Code가 꺼져 있어도 접속할 수 있습니다. **Render 계정은 필요하지 않습니다.**
+**현재 공개 사이트는 외부 MSSQL 서버 연결 대기 상태입니다.** 교재·문제·해설·정답은 읽을 수 있으며, 쿼리 실행과 DB 초기화는 외부 서버가 연결된 뒤 활성화됩니다. 위 주소는 GitHub Pages에서 제공하므로 PC와 VS Code를 꺼도 열립니다.
 
-공개 사이트는 **SQLite(WebAssembly) 브라우저 SQL 모드**입니다. 회사·스토어·캠퍼스 DB 3개에서 조회·추가·수정·삭제·JOIN·집계·CTE·윈도 함수·테이블 생성·트랜잭션을 실제 실행합니다. DB 변경은 방문자마다 독립적으로 해당 브라우저에 저장되며 새로고침 후에도 유지됩니다. 사이트 데이터를 지우거나 다른 기기로 접속하면 별도의 데이터로 시작합니다.
+프로젝트의 SQL 실행 엔진은 **실제 Microsoft SQL Server**입니다. SQL을 다른 문법으로 변환하지 않고 Express API와 MSSQL 드라이버를 거쳐 서버에 전달합니다. 회사·스토어·캠퍼스 DB 3개에서 조회·추가·수정·삭제·DDL·트랜잭션·프로시저 등 T-SQL을 실습합니다.
 
-교재는 SQL Server 기준입니다. `dbo`, `N'문자열'`, `TOP`, 일부 날짜·문자열 함수는 호환 변환합니다. **SQL Server와 완전히 같은 엔진은 아닙니다.** 프로시저·MERGE·PIVOT·ALTER COLUMN·권한 및 저장 자료형 관련 실습은 학습 화면에 별도 표시하며, 기존 **실제 MSSQL 모드**로 실행할 수 있습니다. [지원 범위와 배포 구조](docs/deployment.md)를 확인하세요.
+PC가 꺼진 상태의 실제 MSSQL 실습에는 외부 웹/API 서버와 SQL Server가 필요합니다. Render는 필수가 아니며, 준비된 배포 구성은 Render 웹/API + Azure SQL Database입니다. 운영자만 클라우드 계정을 준비하고, 방문자는 계정·설치·터미널 실행 없이 접속하도록 구성합니다. 실제 외부 연결 검증 전에는 MSSQL 공개 실습 배포 완료로 간주하지 않습니다. [연결과 배포 절차](docs/deployment.md)를 확인하세요.
 
-React + Vite 화면과 기존 Express + Microsoft SQL Server 연결 기능도 함께 유지합니다. 아래 실행 준비는 **실제 MSSQL을 로컬에서 사용할 때만** 필요합니다.
+React + Vite 화면과 Express + Microsoft SQL Server 서버로 구성됩니다. 아래 명령은 운영자·개발자가 로컬 MSSQL로 실행할 때 사용합니다.
 
 ## 실제 MSSQL 로컬 실행 준비
 
@@ -148,4 +148,4 @@ SQL 검사는 앱 소유 실습 DB의 데이터를 초기화합니다. 필요한
 
 브라우저 검사는 설치된 Chrome을 사용합니다. Edge를 사용하려면 PowerShell에서 `$env:BROWSER_CHANNEL='msedge'`를 지정합니다. 브라우저 테스트는 별도 브라우저 컨텍스트를 사용하며 사용자의 실제 브라우저 기록은 변경하지 않습니다. 실패 추적 자료는 `tmp/playwright-results`에 저장합니다.
 
-GitHub Actions는 소스 포맷·단위·빌드·렌더링 검사와 브라우저 SQL 엔진 검사를 실행합니다. `main`에 push하면 별도 Pages 워크플로가 `npm run build:pages`로 빌드해 공개 사이트를 자동 갱신합니다. 실제 MSSQL·포트·기존 브라우저 전체 검증은 SQL Server가 준비된 로컬 환경에서 실행합니다.
+GitHub Actions는 소스 포맷·단위·빌드·렌더링 검사와 Pages의 연결 대기/학습 화면 검사를 실행합니다. `main`에 push하면 Pages 워크플로가 공개 화면을 갱신합니다. 외부 API 주소를 설정하면 실제 MSSQL API 연결도 검사합니다. `npm run test:mssql`은 실제 SQL Server에서 3개 DB·24개 조회 정답과 세션 임시 테이블의 CRUD·MERGE·ROLLBACK을 검사하며 기본 실습 데이터를 보존합니다. 기존 통합·회귀 검사는 DB를 초기화하므로 별도로 실행하세요.

@@ -13,6 +13,8 @@ services:
         value: hosted
       - key: APP_ACCESS
         value: public
+      - key: PUBLIC_CLIENT_ORIGIN
+        value: https://kanggimin.github.io
       - key: SQL_PLATFORM
         value: azure
       - key: SQL_AUTH

@@ -49,6 +49,7 @@ az deployment group what-if \
 | `SQL_USER`     | 논리 서버의 SQL 관리자 계정            |
 | `SQL_PASSWORD` | 해당 계정의 비밀번호, 비밀 값으로 입력 |
 | `APP_ACCESS`   | `public`: 로그인 없이 공개 접속        |
+| `PUBLIC_CLIENT_ORIGIN` | `https://kanggimin.github.io`: Pages 화면의 API 접속 허용 |
 
 나머지 설정은 Blueprint에서 지정합니다. Render의 기본 주소는 `RENDER_EXTERNAL_URL`로 읽습니다. 별도 도메인을 사용하면 `PUBLIC_ORIGIN=https://실제도메인`을 지정합니다. 비밀번호와 `.env`는 Docker 이미지나 Git에 포함되지 않습니다.
 

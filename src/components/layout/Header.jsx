@@ -23,10 +23,10 @@ export default function Header({ view, health, onMenu, onHelp, menuOpen }) {
         >
           <i />
           {health?.ok
-            ? `${engineLabel} ${health.browser ? "준비됨" : "연결됨"}`
+            ? `${engineLabel} 연결됨`
             : health === null
               ? "연결 확인 중"
-              : `${engineLabel} 연결 필요`}
+              : `${engineLabel} ${health.unconfigured ? "연결 대기" : "연결 필요"}`}
         </span>
         <button
           className="help-button"

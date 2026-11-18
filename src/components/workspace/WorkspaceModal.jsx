@@ -3,7 +3,7 @@ import Modal from "../common/Modal";
 import { practiceLabel } from "../database/labels";
 import { workspaceLimits } from "../../../shared/workspace.mjs";
 import { clientUrl } from "../../../shared/runtime.mjs";
-import { browserSql } from "../../config/runtime";
+import { staticSite, apiConfigured } from "../../config/runtime";
 
 export default function WorkspaceModal({
   modal,
@@ -44,16 +44,9 @@ export default function WorkspaceModal({
             데이터를 다시 채웁니다. 현재 변경 사항은 사라집니다.
           </p>
           <p className="muted">
-            {browserSql ? (
-              "다른 DB와 이 브라우저에 저장한 쿼리·학습 진행·실행 기록은 유지됩니다."
-            ) : (
-              <>
-                다른 DB와 브라우저에 저장한 쿼리·실행 기록은 유지됩니다. 단,
-                사용자 정의 스키마·타입과 시간 테이블도 정리합니다. 지원 범위를
-                벗어나는 객체의 의존성이 있으면 전체 초기화를 롤백하고 오류를
-                표시합니다.
-              </>
-            )}
+            다른 DB와 브라우저에 저장한 쿼리·실행 기록은 유지됩니다. 단, 사용자
+            정의 스키마·타입과 시간 테이블도 정리합니다. 지원 범위를 벗어나는
+            객체의 의존성이 있으면 전체 초기화를 롤백하고 오류를 표시합니다.
           </p>
           <div className="modal-actions">
             <button disabled={resetting} onClick={onClose}>
@@ -115,9 +108,7 @@ export default function WorkspaceModal({
       ) : (
         <div className="help-content">
           <p>
-            {browserSql
-              ? "주소만 열면 바로 사용할 수 있는 SQLite 브라우저 SQL 실습실입니다."
-              : "React와 실제 SQL Server가 연결된 개인용 실습실입니다."}
+            실제 Microsoft SQL Server에서 T-SQL을 실행하는 학습 실습실입니다.
           </p>
           <ol>
             <li>
@@ -139,13 +130,17 @@ export default function WorkspaceModal({
               </span>
             </li>
           </ol>
-          {browserSql ? (
+          {staticSite ? (
             <div className="help-setup">
-              <strong>설치와 서버 실행이 필요 없습니다.</strong>
+              <strong>
+                {apiConfigured
+                  ? "실제 MSSQL 서버에 연결합니다."
+                  : "MSSQL 실습 서버 연결 대기"}
+              </strong>
               <p>
-                데이터를 선택하고 SQL을 실행하세요. 실습 DB는 방문자별로 이
-                브라우저의 IndexedDB에 저장됩니다. SQL Server 전용 문법은 지원
-                안내를 확인하세요.
+                {apiConfigured
+                  ? "방문자는 별도 설치 없이 데이터를 고르고 SQL을 실행할 수 있습니다. DB 수정·삭제·초기화는 서버의 공용 실습 데이터에 반영됩니다."
+                  : "지금은 문제·정답·PDF를 학습할 수 있습니다. 운영자가 외부 MSSQL 서버를 연결하면 실행 기능이 활성화됩니다. 방문자는 계정을 만들 필요가 없습니다."}
               </p>
             </div>
           ) : (

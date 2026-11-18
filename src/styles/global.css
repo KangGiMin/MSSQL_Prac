@@ -31,7 +31,7 @@
   font-size: 14px;
   color-scheme: dark;
 }
-.browser-mode-notice {
+.mssql-connection-notice {
   margin-bottom: 22px;
   padding: 14px 18px;
   background: var(--accent-surface);
@@ -41,15 +41,14 @@
   color: var(--muted);
   line-height: 1.9;
 }
-.browser-mode-notice summary {
+.mssql-connection-notice strong {
   display: flex;
   align-items: center;
   gap: 8px;
   color: var(--accent-text);
-  cursor: pointer;
   font-weight: 600;
 }
-.browser-mode-notice p {
+.mssql-connection-notice p {
   margin-top: 7px;
 }
 * {

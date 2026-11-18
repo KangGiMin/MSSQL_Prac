@@ -13,7 +13,7 @@ export function createAccessControl(env = process.env) {
   if (access === "public" && mode !== "hosted")
     throw new Error("공개 접속은 DEPLOYMENT_MODE=hosted에서만 허용합니다.");
 
-  let allowedOrigin, credentials;
+  let allowedOrigin, clientOrigin, credentials;
   if (mode === "hosted") {
     const source = env.PUBLIC_ORIGIN || env.RENDER_EXTERNAL_URL;
     const url = source && URL.parse(source);
@@ -41,6 +41,22 @@ export function createAccessControl(env = process.env) {
         "배포에는 APP_USER와 16자 이상의 APP_PASSWORD가 필요합니다.",
       );
     allowedOrigin = url.origin;
+    if (env.PUBLIC_CLIENT_ORIGIN) {
+      const client = URL.parse(env.PUBLIC_CLIENT_ORIGIN);
+      if (
+        !client ||
+        client.protocol !== "https:" ||
+        client.username ||
+        client.password ||
+        client.pathname !== "/" ||
+        client.search ||
+        client.hash
+      )
+        throw new Error(
+          "PUBLIC_CLIENT_ORIGIN은 https://호스트 형태여야 합니다.",
+        );
+      clientOrigin = client.origin;
+    }
     if (access === "private")
       credentials = digest(`${env.APP_USER}:${env.APP_PASSWORD}`);
   }
@@ -63,7 +79,7 @@ export function createAccessControl(env = process.env) {
     if (
       origin &&
       (mode === "hosted"
-        ? origin !== allowedOrigin
+        ? ![allowedOrigin, clientOrigin].includes(origin)
         : !/^https?:\/\/(localhost|127\.0\.0\.1)(?::\d+)?$/.test(origin))
     )
       return res.status(403).json({ error: "허용되지 않은 요청 출처입니다." });
@@ -72,6 +88,32 @@ export function createAccessControl(env = process.env) {
       // The deployment exposes this process only through its managed HTTPS proxy.
       if (!req.secure && req.get("x-forwarded-proto") !== "https")
         return res.status(403).json({ error: "HTTPS 주소로 접속해 주세요." });
+      if (
+        origin === clientOrigin &&
+        clientOrigin &&
+        req.path.startsWith("/api")
+      ) {
+        res.set("Access-Control-Allow-Origin", clientOrigin);
+        res.vary("Origin");
+        if (req.method === "OPTIONS") {
+          const method = req.get("access-control-request-method");
+          const headers = (req.get("access-control-request-headers") || "")
+            .split(",")
+            .map((value) => value.trim().toLowerCase())
+            .filter(Boolean);
+          if (
+            !["GET", "HEAD", "POST"].includes(method) ||
+            headers.some((header) => header !== "content-type")
+          )
+            return res
+              .status(403)
+              .json({ error: "허용되지 않은 API 사전 요청입니다." });
+          res.set("Access-Control-Allow-Methods", "GET, HEAD, POST");
+          res.set("Access-Control-Allow-Headers", "Content-Type");
+          res.set("Access-Control-Max-Age", "600");
+          return res.status(204).end();
+        }
+      }
       if (access === "public") {
         if (req.path === "/api/setup")
           return res.status(403).json({

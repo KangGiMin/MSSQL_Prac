@@ -1,11 +1,15 @@
 import { network } from "../../shared/runtime.mjs";
-import { browserSql } from "../config/runtime";
-import { databases } from "../../shared/databases.mjs";
-import * as curriculum from "../../shared/curriculum.mjs";
-const browserRequest = async (operation, args = [], signal) =>
-  (await import("../browser/client")).browserCall(operation, args, signal);
+import { missingMssqlMessage } from "../../shared/deployment.mjs";
+import { apiOrigin, apiConfigured } from "../config/runtime";
+
 export async function request(path, options = {}) {
-  const response = await fetch(`${network.apiPrefix}${path}`, {
+  if (!apiConfigured)
+    throw Object.assign(new Error(missingMssqlMessage), {
+      status: 503,
+      body: { unconfigured: true },
+      code: "EMSSQL_UNCONFIGURED",
+    });
+  const response = await fetch(`${apiOrigin}${network.apiPrefix}${path}`, {
     ...options,
     headers: { "Content-Type": "application/json", ...options.headers },
   });
@@ -15,7 +19,7 @@ export async function request(path, options = {}) {
   } catch (error) {
     if (error.name === "AbortError") throw error;
     throw new Error(
-      "서버 응답을 읽을 수 없습니다. npm run dev로 프런트와 서버를 함께 시작하세요.",
+      "MSSQL 실습 서버의 응답을 읽을 수 없습니다. 서버 연결 상태를 확인해 주세요.",
     );
   }
   if (!response.ok)
@@ -27,29 +31,22 @@ export async function request(path, options = {}) {
 }
 const post = (path, body, options = {}) =>
   request(path, { method: "POST", body: JSON.stringify(body), ...options });
-
 export const api = {
-  health: (database, signal) =>
-    browserSql
-      ? browserRequest("health", [database], signal)
-      : request(
-          `/health${database ? `?database=${encodeURIComponent(database)}` : ""}`,
-          { signal },
-        ),
-  databases: async () => (browserSql ? databases : request("/databases")),
-  setup: () =>
-    browserSql ? browserRequest("setup") : post("/setup", { confirm: "setup" }),
-  curriculum: async () => (browserSql ? curriculum : request("/curriculum")),
-  schema: (id) =>
-    browserSql
-      ? browserRequest("schema", [id])
-      : request(`/databases/${id}/schema`),
+  health: async (database, signal) => {
+    const result = await request(
+      `/health${database ? `?database=${encodeURIComponent(database)}` : ""}`,
+      { signal },
+    );
+    if (result.ok && result.engine !== "Microsoft SQL Server")
+      throw new Error("실제 Microsoft SQL Server에 연결된 API가 필요합니다.");
+    return result;
+  },
+  databases: () => request("/databases"),
+  setup: () => post("/setup", { confirm: "setup" }),
+  curriculum: () => request("/curriculum"),
+  schema: (id) => request(`/databases/${id}/schema`),
   query: (database, sql, signal) =>
-    browserSql
-      ? browserRequest("query", [database, sql], signal)
-      : post("/query", { database, sql }, { signal }),
+    post("/query", { database, sql }, { signal }),
   reset: (database) =>
-    browserSql
-      ? browserRequest("reset", [database])
-      : post(`/databases/${database}/reset`, { confirm: database }),
+    post(`/databases/${database}/reset`, { confirm: database }),
 };

@@ -8,7 +8,7 @@ const child = spawn(
     windowsHide: true,
     env: {
       ...process.env,
-      VITE_SQL_ENGINE: "browser",
+      VITE_HOSTING: "github-pages",
       VITE_BASE_PATH: process.env.VITE_BASE_PATH || "/MSSQL_Prac/",
     },
   },

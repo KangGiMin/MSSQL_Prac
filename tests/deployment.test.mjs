@@ -59,6 +59,64 @@ test("local mode retains loopback and local-origin access", async (t) => {
   assert.equal(status, 403);
 });
 
+test("only the configured Pages origin can preflight and call the hosted MSSQL API", async (t) => {
+  const client = "https://kanggimin.github.io";
+  const base = await server(t, {
+    ...hosted,
+    APP_ACCESS: "public",
+    PUBLIC_CLIENT_ORIGIN: client,
+  });
+  const headers = { "X-Forwarded-Proto": "https", Origin: client };
+  const preflight = await fetch(base + "/api/query", {
+    method: "OPTIONS",
+    headers: {
+      ...headers,
+      "Access-Control-Request-Method": "POST",
+      "Access-Control-Request-Headers": "content-type",
+    },
+  });
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers.get("access-control-allow-origin"), client);
+  assert.equal(preflight.headers.get("access-control-allow-credentials"), null);
+  assert.match(preflight.headers.get("vary"), /Origin/);
+  const response = await fetch(base + "/api/query", {
+    method: "POST",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: "{}",
+  });
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("access-control-allow-origin"), client);
+  for (const change of [
+    {
+      Origin: "https://untrusted.example",
+      "Access-Control-Request-Method": "POST",
+    },
+    { "Access-Control-Request-Method": "DELETE" },
+    {
+      "Access-Control-Request-Method": "POST",
+      "Access-Control-Request-Headers": "authorization",
+    },
+  ])
+    assert.equal(
+      (
+        await fetch(base + "/api/query", {
+          method: "OPTIONS",
+          headers: { ...headers, ...change },
+        })
+      ).status,
+      403,
+    );
+  for (const origin of [
+    "http://kanggimin.github.io",
+    "https://kanggimin.github.io/path",
+    "https://user:password@kanggimin.github.io",
+    "invalid",
+  ])
+    assert.throws(() =>
+      createAccessControl({ ...hosted, PUBLIC_CLIENT_ORIGIN: origin }),
+    );
+});
+
 test("hosted mode fails closed without HTTPS origin and strong credentials", () => {
   for (const change of [
     { PUBLIC_ORIGIN: undefined },

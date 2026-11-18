@@ -3,7 +3,6 @@ import CodeMirror from "@uiw/react-codemirror";
 import { sql, MSSQL } from "@codemirror/lang-sql";
 import { EditorView, keymap } from "@codemirror/view";
 import { Prec } from "@codemirror/state";
-import { browserSql } from "../../config/runtime";
 import {
   sqlBlueTheme,
   editorAppearance,
@@ -98,8 +97,7 @@ export default function QueryEditor({
           <i />
         </div>
         <span className="editor-dialect">
-          {browserSql ? "SQLite · 브라우저 실습" : "Microsoft SQL Server"}{" "}
-          <span>{browserSql ? "SQL" : "T-SQL"}</span>
+          Microsoft SQL Server <span>T-SQL</span>
         </span>
       </div>
       <div className="editor-toolbar">
