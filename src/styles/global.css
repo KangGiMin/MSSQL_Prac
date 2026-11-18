@@ -31,26 +31,6 @@
   font-size: 14px;
   color-scheme: dark;
 }
-.mssql-connection-notice {
-  margin-bottom: 22px;
-  padding: 14px 18px;
-  background: var(--accent-surface);
-  border: 1px solid var(--accent-border);
-  border-radius: 9px;
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.9;
-}
-.mssql-connection-notice strong {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--accent-text);
-  font-weight: 600;
-}
-.mssql-connection-notice p {
-  margin-top: 7px;
-}
 * {
   box-sizing: border-box;
 }

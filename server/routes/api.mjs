@@ -38,7 +38,6 @@ api.get("/health", async (req, res) => {
   const failed = states.find((state) => !state.ok);
   res.status(failed ? 503 : 200).json({
     engine: "Microsoft SQL Server",
-    publicWorkspace: res.locals.publicWorkspace === true,
     ...states[0],
     ok: !failed,
     databases: states,

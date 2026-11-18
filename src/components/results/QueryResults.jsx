@@ -11,7 +11,6 @@ import {
   Loader2,
 } from "lucide-react";
 import { downloadCsv, downloadJson } from "../../lib/export";
-import { engineLabel } from "../../config/runtime";
 export default function QueryResults({ result, running, canceling }) {
   const [tab, setTab] = useState("results"),
     [index, setIndex] = useState(0),
@@ -98,7 +97,7 @@ export default function QueryResults({ result, running, canceling }) {
           <strong>
             {canceling
               ? "실행을 취소하고 연결을 정리하고 있습니다"
-              : `${engineLabel}에서 실행 중입니다`}
+              : "SQL Server에서 실행 중입니다"}
           </strong>
           <p>
             {canceling

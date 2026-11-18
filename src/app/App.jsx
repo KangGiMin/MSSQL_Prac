@@ -17,8 +17,6 @@ import {
 import Sidebar from "../components/layout/Sidebar";
 import Header from "../components/layout/Header";
 import Hero from "../components/common/Hero";
-import MssqlConnectionNotice from "../components/learning/MssqlConnectionNotice";
-import { apiConfigured, staticSite, engineLabel } from "../config/runtime";
 import WorkspaceModal from "../components/workspace/WorkspaceModal";
 import DatabaseCards from "../components/database/DatabaseCards";
 import { practiceLabel } from "../components/database/labels";
@@ -418,7 +416,6 @@ export default function App() {
           onHelp={() => setModal("help")}
         />
         <main className="main-content">
-          {!apiConfigured && <MssqlConnectionNotice />}
           {storageProblem && (
             <div className="error-banner" role="alert">
               <AlertTriangle size={16} />
@@ -454,11 +451,11 @@ export default function App() {
                   </h2>
                   <span>작성 → 실행 → 결과 확인</span>
                 </div>
-                {health && !health.ok && !health.unconfigured && (
+                {health && !health.ok && (
                   <div className="error-banner">
                     <AlertTriangle size={16} />
                     <div>
-                      <strong>{engineLabel} 준비 상태를 확인해 주세요.</strong>
+                      <strong>SQL Server 연결을 확인해 주세요.</strong>
                       <p>
                         {health.error} 시작 가이드에서 설정 방법을 확인할 수
                         있습니다.
@@ -467,14 +464,12 @@ export default function App() {
                     <button onClick={refreshHealth} disabled={resetting}>
                       다시 연결
                     </button>
-                    {!staticSite && (
-                      <button
-                        onClick={prepareDatabases}
-                        disabled={resetting || runner.running}
-                      >
-                        {resetting ? "준비 중…" : "DB 준비"}
-                      </button>
-                    )}
+                    <button
+                      onClick={prepareDatabases}
+                      disabled={resetting || runner.running}
+                    >
+                      {resetting ? "준비 중…" : "DB 준비"}
+                    </button>
                   </div>
                 )}
                 {practiceMode && (
@@ -553,11 +548,8 @@ export default function App() {
                 <div className="workbench-footnote">
                   <span>
                     <Info size={13} />
-                    {!apiConfigured
-                      ? "SQL은 실제 MSSQL Server에서 실행합니다. 서버 연결 전에는 실행·초기화가 비활성화됩니다."
-                      : health?.publicWorkspace
-                        ? "공용 실습 DB입니다. 수정·삭제·초기화는 다른 방문자에게도 반영됩니다. 작성한 SQL과 학습 기록은 이 브라우저에 저장됩니다."
-                        : "실제 Microsoft SQL Server에서 실행합니다. 변경 사항은 DB에 반영되며, DB 초기화로 복원할 수 있어요."}
+                    실제 Microsoft SQL Server에서 실행합니다. 변경 사항은 DB에
+                    반영되며, DB 초기화로 복원할 수 있어요.
                   </span>
                 </div>
               </section>

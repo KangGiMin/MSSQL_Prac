@@ -8,7 +8,6 @@ export default defineConfig(({ mode }) => {
   if (!isValidPort(clientPort))
     throw new Error("CLIENT_PORT는 1~65535 사이의 정수여야 합니다.");
   return {
-    base: env.VITE_BASE_PATH || "/",
     plugins: [react()],
     build: {
       rollupOptions: {

@@ -21,8 +21,8 @@ export const sourceFiles = {
   manifest: "manifest.json",
 };
 export const sourceUrls = {
-  pdf: `${import.meta.env?.BASE_URL || "/"}materials/${sourceFiles.pdf}`,
-  pages: `${import.meta.env?.BASE_URL || "/"}materials/${sourceFiles.pages}`,
+  pdf: `/materials/${sourceFiles.pdf}`,
+  pages: `/materials/${sourceFiles.pages}`,
 };
 
 export const defaultQueries = {

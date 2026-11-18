@@ -3,7 +3,6 @@ import Modal from "../common/Modal";
 import { practiceLabel } from "../database/labels";
 import { workspaceLimits } from "../../../shared/workspace.mjs";
 import { clientUrl } from "../../../shared/runtime.mjs";
-import { staticSite, apiConfigured } from "../../config/runtime";
 
 export default function WorkspaceModal({
   modal,
@@ -107,9 +106,7 @@ export default function WorkspaceModal({
         </>
       ) : (
         <div className="help-content">
-          <p>
-            실제 Microsoft SQL Server에서 T-SQL을 실행하는 학습 실습실입니다.
-          </p>
+          <p>React와 실제 SQL Server가 연결된 개인용 실습실입니다.</p>
           <ol>
             <li>
               <strong>DB 선택</strong>
@@ -130,28 +127,13 @@ export default function WorkspaceModal({
               </span>
             </li>
           </ol>
-          {staticSite ? (
-            <div className="help-setup">
-              <strong>
-                {apiConfigured
-                  ? "실제 MSSQL 서버에 연결합니다."
-                  : "MSSQL 실습 서버 연결 대기"}
-              </strong>
-              <p>
-                {apiConfigured
-                  ? "방문자는 별도 설치 없이 데이터를 고르고 SQL을 실행할 수 있습니다. DB 수정·삭제·초기화는 서버의 공용 실습 데이터에 반영됩니다."
-                  : "지금은 문제·정답·PDF를 학습할 수 있습니다. 운영자가 외부 MSSQL 서버를 연결하면 실행 기능이 활성화됩니다. 방문자는 계정을 만들 필요가 없습니다."}
-              </p>
-            </div>
-          ) : (
-            <div className="help-setup">
-              <strong>로컬 서버 시작</strong>
-              <pre>npm.cmd ci{"\n"}npm.cmd run dev</pre>
-              <p>
-                {`기본 주소는 ${clientUrl()}입니다. Live Server(5500) 대신 이 주소를 사용하세요. 연결 변경은 .env.example을 .env로 복사한 뒤 SQL_SERVER와 인증 방식을 수정하세요.`}
-              </p>
-            </div>
-          )}
+          <div className="help-setup">
+            <strong>로컬 서버 시작</strong>
+            <pre>npm.cmd ci{"\n"}npm.cmd run dev</pre>
+            <p>
+              {`기본 주소는 ${clientUrl()}입니다. Live Server(5500) 대신 이 주소를 사용하세요. 연결 변경은 .env.example을 .env로 복사한 뒤 SQL_SERVER와 인증 방식을 수정하세요.`}
+            </p>
+          </div>
           <p className="muted">
             각 실행은 독립 연결입니다. BEGIN TRAN과 COMMIT/ROLLBACK은 한 번에
             실행하세요. 서버 관리 명령과 다른 DB 접근은 제한됩니다. 현재

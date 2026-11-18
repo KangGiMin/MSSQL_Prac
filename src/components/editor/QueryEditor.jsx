@@ -44,8 +44,7 @@ export default function QueryEditor({
       view.state.selection.main.from,
       view.state.selection.main.to,
     );
-    const query = selection?.trim() ? selection : view?.state.doc.toString();
-    if (query?.trim()) runRef.current(query);
+    runRef.current(selection?.trim() ? selection : undefined);
   }, []);
   const extensions = useMemo(
     () => [
