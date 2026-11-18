@@ -1,4 +1,9 @@
 import { network } from "../../shared/runtime.mjs";
+import { browserSql } from "../config/runtime";
+import { databases } from "../../shared/databases.mjs";
+import * as curriculum from "../../shared/curriculum.mjs";
+const browserRequest = async (operation, args = [], signal) =>
+  (await import("../browser/client")).browserCall(operation, args, signal);
 export async function request(path, options = {}) {
   const response = await fetch(`${network.apiPrefix}${path}`, {
     ...options,
@@ -25,16 +30,26 @@ const post = (path, body, options = {}) =>
 
 export const api = {
   health: (database, signal) =>
-    request(
-      `/health${database ? `?database=${encodeURIComponent(database)}` : ""}`,
-      { signal },
-    ),
-  databases: () => request("/databases"),
-  setup: () => post("/setup", { confirm: "setup" }),
-  curriculum: () => request("/curriculum"),
-  schema: (id) => request(`/databases/${id}/schema`),
+    browserSql
+      ? browserRequest("health", [database], signal)
+      : request(
+          `/health${database ? `?database=${encodeURIComponent(database)}` : ""}`,
+          { signal },
+        ),
+  databases: async () => (browserSql ? databases : request("/databases")),
+  setup: () =>
+    browserSql ? browserRequest("setup") : post("/setup", { confirm: "setup" }),
+  curriculum: async () => (browserSql ? curriculum : request("/curriculum")),
+  schema: (id) =>
+    browserSql
+      ? browserRequest("schema", [id])
+      : request(`/databases/${id}/schema`),
   query: (database, sql, signal) =>
-    post("/query", { database, sql }, { signal }),
+    browserSql
+      ? browserRequest("query", [database, sql], signal)
+      : post("/query", { database, sql }, { signal }),
   reset: (database) =>
-    post(`/databases/${database}/reset`, { confirm: database }),
+    browserSql
+      ? browserRequest("reset", [database])
+      : post(`/databases/${database}/reset`, { confirm: database }),
 };

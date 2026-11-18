@@ -17,6 +17,8 @@ import {
 import Sidebar from "../components/layout/Sidebar";
 import Header from "../components/layout/Header";
 import Hero from "../components/common/Hero";
+import BrowserModeNotice from "../components/learning/BrowserModeNotice";
+import { browserSql, engineLabel } from "../config/runtime";
 import WorkspaceModal from "../components/workspace/WorkspaceModal";
 import DatabaseCards from "../components/database/DatabaseCards";
 import { practiceLabel } from "../components/database/labels";
@@ -416,6 +418,7 @@ export default function App() {
           onHelp={() => setModal("help")}
         />
         <main className="main-content">
+          {browserSql && <BrowserModeNotice />}
           {storageProblem && (
             <div className="error-banner" role="alert">
               <AlertTriangle size={16} />
@@ -455,7 +458,7 @@ export default function App() {
                   <div className="error-banner">
                     <AlertTriangle size={16} />
                     <div>
-                      <strong>SQL Server 연결을 확인해 주세요.</strong>
+                      <strong>{engineLabel} 준비 상태를 확인해 주세요.</strong>
                       <p>
                         {health.error} 시작 가이드에서 설정 방법을 확인할 수
                         있습니다.
@@ -548,8 +551,11 @@ export default function App() {
                 <div className="workbench-footnote">
                   <span>
                     <Info size={13} />
-                    실제 Microsoft SQL Server에서 실행합니다. 변경 사항은 DB에
-                    반영되며, DB 초기화로 복원할 수 있어요.
+                    {browserSql
+                      ? "실습 데이터는 이 브라우저에 저장되며 다른 방문자의 데이터와 분리됩니다. 사이트 저장소를 삭제하면 DB 변경 사항도 사라집니다."
+                      : health?.publicWorkspace
+                        ? "공용 실습 DB입니다. 수정·삭제·초기화는 다른 방문자에게도 반영됩니다. 작성한 SQL과 학습 기록은 이 브라우저에 저장됩니다."
+                        : "실제 Microsoft SQL Server에서 실행합니다. 변경 사항은 DB에 반영되며, DB 초기화로 복원할 수 있어요."}
                   </span>
                 </div>
               </section>

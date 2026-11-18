@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { practiceLabel } from "../database/labels";
+import { browserSql } from "../../config/runtime";
+import { browserLessonLimits } from "../../config/browserSupport";
 import {
   BookOpen,
   ArrowUpRight,
@@ -64,6 +66,15 @@ export default function LessonPanel({
         </div>
         <h3>{lesson.title}</h3>
         <p className="lesson-description">{lesson.explanation}</p>
+        {browserSql && browserLessonLimits[lesson.id] && (
+          <div className="caution-box" role="note">
+            <strong>이 항목은 SQL Server 모드에서 실습</strong>
+            <p>
+              {browserLessonLimits[lesson.id]} 개념·정답·교재는 이 화면에서 볼
+              수 있습니다.
+            </p>
+          </div>
+        )}
         <div className="lesson-database">
           실습 DB <span>{practiceLabel(lesson.database)}</span>
         </div>

@@ -155,6 +155,80 @@ test("only the exact read-only liveness route bypasses hosted authentication", a
   );
 });
 
+test("public hosting accepts visitors without credentials and retains HTTPS and origin checks", async (t) => {
+  const base = await server(t, {
+    DEPLOYMENT_MODE: "hosted",
+    APP_ACCESS: "public",
+    PUBLIC_ORIGIN: hosted.PUBLIC_ORIGIN,
+  });
+  for (const path of [
+    "/",
+    "/assets/main.js",
+    "/api/health",
+    "/materials/sql-reference.pdf",
+  ]) {
+    assert.equal((await fetch(base + path)).status, 403);
+    const response = await fetch(base + path, {
+      headers: { "X-Forwarded-Proto": "https" },
+    });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("www-authenticate"), null);
+  }
+  assert.equal(
+    (
+      await fetch(base + "/api/query", {
+        method: "POST",
+        headers: {
+          "X-Forwarded-Proto": "https",
+          Origin: hosted.PUBLIC_ORIGIN,
+        },
+      })
+    ).status,
+    200,
+  );
+  assert.equal(
+    (
+      await fetch(base + "/api/query", {
+        method: "POST",
+        headers: {
+          "X-Forwarded-Proto": "https",
+          Origin: "https://untrusted.example",
+        },
+      })
+    ).status,
+    403,
+  );
+  assert.equal(
+    (
+      await fetch(base + "/api/setup", {
+        method: "POST",
+        headers: {
+          "X-Forwarded-Proto": "https",
+          Origin: hosted.PUBLIC_ORIGIN,
+        },
+      })
+    ).status,
+    403,
+  );
+});
+
+test("public access requires explicit hosted configuration and a valid HTTPS origin", () => {
+  assert.throws(() => createAccessControl({ APP_ACCESS: "public" }));
+  assert.throws(() =>
+    createAccessControl({ ...hosted, APP_ACCESS: "anything" }),
+  );
+  assert.throws(() =>
+    createAccessControl({ DEPLOYMENT_MODE: "hosted", APP_ACCESS: "public" }),
+  );
+  assert.throws(() =>
+    createAccessControl({
+      DEPLOYMENT_MODE: "hosted",
+      APP_ACCESS: "public",
+      PUBLIC_ORIGIN: "http://practice.example",
+    }),
+  );
+});
+
 function pool(markers, objects = []) {
   const calls = [];
   return {

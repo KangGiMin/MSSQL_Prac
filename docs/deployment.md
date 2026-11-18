@@ -1,58 +1,59 @@
-# 무료 배포 준비: Render + Azure SQL
+# GitHub Pages 공개 SQL 실습실
 
-이 구성은 개인 PC와 VS Code를 꺼도 실행되도록 웹/API를 Render Free에, 실습 DB 3개를 Azure SQL Database 무료 요금제에 둡니다. 현재 저장소에는 배포 설정이 준비되어 있으며, 실제 리소스 생성과 외부 접속 검증은 계정 연결 후 진행해야 합니다.
+접속 주소: **https://kanggimin.github.io/MSSQL_Prac/**
 
-## 필요한 계정과 무료 서비스의 범위
+README의 링크를 클릭하면 바로 사용할 수 있습니다. 방문자와 운영자 모두 Render 계정·외부 SQL Server 계정이 필요하지 않습니다. 공개 파일은 GitHub Pages에서 제공하며 SQL은 방문자의 브라우저에서 실행하므로 운영자의 PC를 켜 두지 않아도 됩니다.
 
-- Render 계정과 활성화된 Azure 구독이 필요합니다. Microsoft 계정 로그인과 Azure 구독 활성화는 별개입니다.
-- Render 서비스는 `render.yaml`에서 `plan: free`로 고정했습니다. 미사용 15분 뒤 중지되며, 다음 접속 때 시작에 약 1분이 걸릴 수 있습니다. 무료 사용 시간·트래픽·빌드 한도가 있습니다. 결제 수단을 등록하지 않으면 트래픽 한도 초과 시 추가 결제 대신 서비스가 중지됩니다. 빌드 비용도 발생하지 않도록 지출 한도를 0으로 확인합니다.
-- Azure SQL 무료 요금제는 DB별 월 100,000 vCore초와 데이터·백업 각 32GB를 제공합니다. 이 프로젝트는 DB 3개를 사용합니다. `useFreeLimit: true`, `freeLimitExhaustionBehavior: AutoPause`로 지정해 한도 소진 시 다음 달까지 정지합니다. 유료 초과 사용으로 변경하지 않습니다.
-- 사용하지 않을 때는 웹 탭을 닫습니다. 기존 화면은 연결 상태를 30초마다 확인하므로 탭을 계속 열어두면 선택한 DB가 유휴 중지되지 않아 무료 연산량을 소모할 수 있습니다.
-- 처음부터 유료 플랜이나 기간 한정 크레딧에 의존하지 않습니다. 계정의 무료 요금제 자격·지역 지원 여부를 확인해야 하며, 지원되지 않으면 유료 설정으로 대체하지 않습니다.
-- Azure SQL은 SQL Server와 같은 T-SQL 엔진 계열이지만 인스턴스 관리 기능은 다릅니다. 이 배포 모드는 서버 DB 생성·TRUSTWORTHY 설정을 실행하지 않고, 미리 생성한 전용 DB 안에서 실습합니다. 실제 Azure에서 전체 실습 검증은 아직 필요합니다.
+## 두 실행 모드
 
-공식 문서: [Render Free](https://render.com/docs/free), [Azure SQL 무료 요금제](https://learn.microsoft.com/en-us/azure/azure-sql/database/free-tier), [Render Blueprint](https://render.com/docs/blueprint-spec).
+| 구분 | 공개 사이트 | 기존 로컬 MSSQL 모드 |
+| --- | --- | --- |
+| 실행 엔진 | sql.js의 SQLite WebAssembly | 실제 Microsoft SQL Server |
+| 실행 위치 | 방문자 브라우저의 Web Worker | Express API를 통해 SQL Server |
+| 데이터 | 방문자별 독립 DB 3개, IndexedDB에 저장 | 기존 전용 SQL Server DB 3개 |
+| 시작 | 위 주소 클릭 | `npm run dev` |
+| 빌드 | `npm run build:pages` | `npm run build` |
+| 추가 계정 | 없음 | 로컬 SQL Server 또는 별도 서버 필요 |
 
-## Azure DB 준비
+공개 모드는 결과를 미리 만들어 보여 주는 모의 실행기가 아닙니다. 실제 SQLite 엔진이 입력한 SQL을 실행하고, 변경된 DB 파일을 브라우저에 보관합니다. 실제 MSSQL 모드의 연결·권한·서버 코드는 유지합니다. 공개 빌드에 로컬 SQL 인증 정보는 포함하지 않습니다.
 
-Azure에 로그인하고 사용할 구독·지역·리소스 그룹을 선택합니다. 포털에서 새 SQL **논리 서버**를 준비하고 SQL 인증 관리자 계정을 만듭니다. 비밀번호는 Render의 비밀 환경 변수에만 입력하며 저장소에 넣지 않습니다.
+## 지원 범위
 
-새 서버에 실습 DB가 아직 없는 상태에서 [deploy/azure-free-databases.json](../deploy/azure-free-databases.json)을 사용합니다. Azure Cloud Shell에 이 파일을 업로드한 다음 실제 값으로 바꾸어 미리 보기를 실행합니다.
+- SELECT, WHERE, JOIN, GROUP BY/HAVING, 정렬, 서브쿼리, CASE, COALESCE, 집합 연산, CTE, 윈도 함수
+- INSERT, UPDATE, DELETE, CREATE/DROP TABLE, 열 추가·삭제, PK/FK/CHECK, 기본 인덱스, 뷰
+- BEGIN TRAN, COMMIT, ROLLBACK. 실행 종료 시 남은 트랜잭션은 롤백합니다.
+- 호환 변환: `dbo.`, 대괄호 식별자, `N'문자열'`, 바깥 SELECT의 정수 TOP, 단순 TOP WITH TIES, OFFSET/FETCH, SELECT INTO, 교재의 UPDATE 별칭 패턴
+- 함수: LEN, LEFT/RIGHT, SUBSTRING, ISNULL, GETDATE, DATEADD/DATEDIFF의 day/month/year/hour/minute/second, 일부 CONVERT
+- GO 배치 분리, 여러 결과표, 중복 열 이름 보존, CSV/JSON 내보내기, DB별 초기화
 
-```sh
-az deployment group what-if \
-  --resource-group YOUR_RESOURCE_GROUP \
-  --template-file azure-free-databases.json \
-  --mode Incremental \
-  --parameters serverName=YOUR_SQL_SERVER location=YOUR_REGION
+SQLite의 자료형·문자열 비교·NULL 정렬·정수 나눗셈·집계·날짜 동작은 SQL Server와 차이가 있습니다. CHAR/NCHAR의 길이와 NVARCHAR 제한, DECIMAL 정밀도, IDENTITY, 중첩 트랜잭션 등 SQL Server의 규칙을 그대로 재현하지 않습니다. TOP의 서브쿼리 변환 등 임의 T-SQL 전체를 지원하는 변환기는 아닙니다.
+
+프로시저·사용자 함수·MERGE·PIVOT·ALTER COLUMN·기존 테이블의 ADD CONSTRAINT·DECLARE·TRY/CATCH·OPENJSON·권한 관리·서버 관리·시스템 카탈로그·INCLUDE 인덱스·DATALENGTH는 실제 SQL Server에서 실습합니다. 관련 학습 항목에는 **SQL Server 실습 필요** 표시를 붙였습니다. 해당 항목의 설명·정답·원본 PDF는 공개 사이트에서도 읽을 수 있습니다. `CONVERT`의 스타일 인수는 `DATE` 대상의 `112`만 지원합니다.
+
+자유 실습 24개의 예시 답안과 브라우저에서 실행 가능한 교재·확장 항목은 자동 테스트로 검사합니다. 모든 T-SQL 문법이나 SQL Server와의 결과 일치를 보장하는 검사는 아닙니다.
+
+## 저장·취소·한도
+
+- 기본 데이터는 기존 SQL Server용 시드에서 실제 SQLite DB 3개를 생성합니다. 새로고침 후에도 수정 내용을 유지합니다. 다른 방문자의 데이터는 바뀌지 않습니다.
+- 같은 출처의 탭은 Web Locks와 저장 리비전으로 충돌을 방지합니다. 잠금 기능이 없는 브라우저는 IndexedDB의 리비전 충돌 검사를 사용합니다.
+- 사이트 저장소 삭제·시크릿 모드 종료·기기 변경 시 DB가 유지되지 않을 수 있습니다. 브라우저 저장 공간이 부족하거나 차단되면 오류를 표시합니다.
+- 기존 **전체 백업**은 작성 SQL·진행도·기록용이며 테이블 데이터 자체를 백업하지 않습니다. 데이터가 필요하면 조회 결과를 CSV/JSON으로 내려받으세요.
+- SQL 최대 50,000자, GO 배치 최대 30개, 실행 요청 15초 제한, 결과 최대 20개, 결과별 최대 1,000행·256열, 보관 행 데이터 총 8MB입니다.
+- 취소·시간 초과는 Worker를 종료합니다. 완료되어 저장된 이전 실행은 유지되지만, 중단된 현재 실행은 저장되지 않습니다. 일반 SQL 오류에서는 앞서 자동 커밋한 변경을 저장하고 미완료 트랜잭션만 롤백합니다.
+
+## 자동 배포
+
+`.github/workflows/pages.yml`이 `main` push 또는 수동 실행을 받아 검사 → 브라우저 모드 빌드 → Pages 업로드 → 배포를 수행합니다. `VITE_SQL_ENGINE=browser`, 저장소 이름에 맞는 `VITE_BASE_PATH`를 빌드할 때 지정합니다. WASM·Worker·교재·PDF 모두 `/MSSQL_Prac/` 경로에서 제공합니다. 서버나 DB 비밀번호를 Actions secret으로 등록할 필요가 없습니다.
+
+```powershell
+npm.cmd ci --ignore-scripts
+npm.cmd test
+npm.cmd run build:pages
+npm.cmd run test:pages
 ```
 
-예상 결과는 `QueryGround_Company`, `QueryGround_Store`, `QueryGround_Campus` DB 3개 생성입니다. 기존 DB 변경이 보이면 중단합니다. 무료 플래그와 `AutoPause`를 확인한 후 같은 인수로 `what-if`를 `create`로 바꾸어 적용합니다. 생성 후 포털에서 각 DB가 무료 요금제이고 한도 소진 동작이 중지인지 다시 확인합니다. 생성이 실패하거나 상태가 불명확하면 기존 리소스를 먼저 확인하며, 무료 플래그를 제거해서 재시도하지 않습니다.
+GitHub 저장소 **Settings → Pages → Source**는 **GitHub Actions**입니다. 진행 상태는 저장소의 **Actions → Deploy SQL practice to GitHub Pages**에서 확인할 수 있습니다. 검사나 배포가 실패하면 마지막 성공 배포가 유지됩니다.
 
-논리 서버 방화벽에는 Render 서비스의 Outbound IP 범위만 허용합니다. 데이터베이스를 전체 인터넷에 개방하지 않습니다. 이 템플릿은 인증·방화벽·다른 리소스를 변경하지 않습니다.
+공식 문서: [GitHub Pages 사용자 워크플로](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages), [sql.js 프로젝트](https://github.com/sql-js/sql.js).
 
-## Render 배포
-
-현재 변경 사항을 포함한 저장소를 연결하고 **Blueprint**에서 `render.yaml`을 선택합니다. DB 방화벽 설정 전에는 초기 연결이 실패할 수 있으며, 방화벽을 설정한 뒤 같은 서비스에서 다시 배포합니다.
-
-| 변수           | 값                                       |
-| -------------- | ---------------------------------------- |
-| `SQL_SERVER`   | `YOUR_SQL_SERVER.database.windows.net`   |
-| `SQL_USER`     | 논리 서버의 SQL 관리자 계정              |
-| `SQL_PASSWORD` | 해당 계정의 비밀번호, 비밀 값으로 입력   |
-| `APP_USER`     | 브라우저 접속 계정. 기본값 `queryground` |
-| `APP_PASSWORD` | 자동 생성되는 브라우저 접속 비밀번호     |
-
-나머지 설정은 Blueprint에서 지정합니다. Render의 기본 주소는 `RENDER_EXTERNAL_URL`로 읽습니다. 별도 도메인을 사용하면 `PUBLIC_ORIGIN=https://실제도메인`을 지정합니다. 비밀번호와 `.env`는 Docker 이미지나 Git에 포함되지 않습니다.
-
-Docker 이미지에는 React 빌드, API, 실습 초기 데이터, 교재 파일이 포함됩니다. 시작할 때 새 전용 DB만 준비하며 기존 준비된 DB의 내용은 보존합니다. 외부 접속은 HTTPS와 브라우저 기본 로그인으로 보호합니다. 학습 진행·작성 SQL·실행 기록은 기존과 같이 브라우저 저장소를 사용합니다.
-
-로그인 비밀번호는 Render 환경 변수에서 확인합니다. 기본 상태 검사 `/healthz`에는 DB·사용자 정보가 없고, SQL API와 정적 파일·교재는 로그인이 필요합니다.
-
-## 접속 확인과 기존 작업 이동
-
-배포 성공 후 실제 발급된 HTTPS 주소에서 로그인하고, 세 데이터 선택·스키마 조회·SELECT 실행·취소·저장·교재 열기를 확인합니다. Azure 실습 DB의 DDL·DML·초기화 검사는 클라우드에 만든 전용 DB에서만 진행합니다.
-
-로컬 주소와 배포 주소는 브라우저 저장소가 다릅니다. 로컬의 **전체 백업**을 내보내 배포 주소에서 **백업 복원**으로 가져옵니다. 이 백업은 작성한 SQL·진행·기록을 옮기며 SQL Server 테이블 데이터 자체를 복사하지 않습니다. 클라우드 DB는 기본 실습 데이터로 별도 시작하고, 로컬 실습 DB는 유지합니다.
-
-주소를 발급하거나 실제 클라우드에서 검증하기 전에는 배포 완료로 간주하지 않습니다. 이 PC에서 실행한 개발 서버나 임시 터널 주소는 PC가 꺼진 상태의 호스팅을 대신하지 못합니다.
+실제 SQL Server를 클라우드로 운영하는 별도 구성은 [MSSQL 클라우드 배포 안내](deployment-mssql.md)를 참고하세요. 현재 공개 사이트는 그 서비스에 의존하지 않습니다.

@@ -1,6 +1,7 @@
 import { timing } from "../config/workbench";
 import { useState, useRef, useEffect } from "react";
 import { api } from "../lib/api";
+import { browserSql } from "../config/runtime";
 export function useQueryRunner(onComplete) {
   const [result, setResult] = useState(null),
     [running, setRunning] = useState(false);
@@ -30,7 +31,9 @@ export function useQueryRunner(onComplete) {
     } catch (error) {
       const message =
         error.name === "AbortError"
-          ? "실행 요청을 취소했습니다. 서버가 연결을 정리하는 동안 잠시 기다려 주세요."
+          ? browserSql
+            ? "실행 요청을 취소했습니다. 완료되지 않은 실행은 저장되지 않습니다."
+            : "실행 요청을 취소했습니다. 서버가 연결을 정리하는 동안 잠시 기다려 주세요."
           : error.message;
       setResult({
         recordsets: [],

@@ -1,5 +1,6 @@
 import { Menu, CircleHelp } from "lucide-react";
 import { views } from "../../config/navigation";
+import { engineLabel } from "../../config/runtime";
 export default function Header({ view, health, onMenu, onHelp, menuOpen }) {
   return (
     <header className="topbar">
@@ -22,10 +23,10 @@ export default function Header({ view, health, onMenu, onHelp, menuOpen }) {
         >
           <i />
           {health?.ok
-            ? "SQL Server 연결됨"
+            ? `${engineLabel} ${health.browser ? "준비됨" : "연결됨"}`
             : health === null
               ? "연결 확인 중"
-              : "SQL Server 연결 필요"}
+              : `${engineLabel} 연결 필요`}
         </span>
         <button
           className="help-button"

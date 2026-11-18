@@ -1,8 +1,18 @@
 ﻿# QueryGround · MSSQL 자기주도 학습 실습실
 
-React + Vite, Express API와 실제 Microsoft SQL Server를 연결한 Windows 개인용 SQL 학습 앱입니다. SQL을 흉내 내는 실행기가 아니라 SQL Server에서 SELECT·DML·DDL·트랜잭션·프로시저를 실행합니다.
+## 사이트 바로 접속
 
-## 실행 준비
+### [▶ SQL 실습 시작하기](https://kanggimin.github.io/MSSQL_Prac/)
+
+위 주소를 클릭하면 설치·회원가입·터미널 실행 없이 바로 실습할 수 있습니다. GitHub Pages에서 제공하므로 프로젝트 소유자의 PC와 VS Code가 꺼져 있어도 접속할 수 있습니다. **Render 계정은 필요하지 않습니다.**
+
+공개 사이트는 **SQLite(WebAssembly) 브라우저 SQL 모드**입니다. 회사·스토어·캠퍼스 DB 3개에서 조회·추가·수정·삭제·JOIN·집계·CTE·윈도 함수·테이블 생성·트랜잭션을 실제 실행합니다. DB 변경은 방문자마다 독립적으로 해당 브라우저에 저장되며 새로고침 후에도 유지됩니다. 사이트 데이터를 지우거나 다른 기기로 접속하면 별도의 데이터로 시작합니다.
+
+교재는 SQL Server 기준입니다. `dbo`, `N'문자열'`, `TOP`, 일부 날짜·문자열 함수는 호환 변환합니다. **SQL Server와 완전히 같은 엔진은 아닙니다.** 프로시저·MERGE·PIVOT·ALTER COLUMN·권한 및 저장 자료형 관련 실습은 학습 화면에 별도 표시하며, 기존 **실제 MSSQL 모드**로 실행할 수 있습니다. [지원 범위와 배포 구조](docs/deployment.md)를 확인하세요.
+
+React + Vite 화면과 기존 Express + Microsoft SQL Server 연결 기능도 함께 유지합니다. 아래 실행 준비는 **실제 MSSQL을 로컬에서 사용할 때만** 필요합니다.
+
+## 실제 MSSQL 로컬 실행 준비
 
 - Node.js 24 이상
 - Microsoft SQL Server 인스턴스
@@ -38,7 +48,7 @@ npm.cmd start
 
 이때는 **http://127.0.0.1:3001/** 로 접속합니다. 개발 주소와 프로덕션 주소는 브라우저 저장소가 서로 다르므로, 이동 전 전체 백업을 사용하세요.
 
-PC를 꺼도 접속할 수 있는 무료 클라우드 배포 설정은 [무료 배포 안내](docs/deployment.md)에 있습니다. Render Free 웹/API와 Azure SQL 무료 요금제를 사용하며, 실제 배포에는 계정 연결과 외부 검증이 필요합니다.
+공개 사이트의 자동 배포는 [GitHub Pages 배포 안내](docs/deployment.md)를 참고하세요. 실제 SQL Server까지 외부 서버에서 운영하려는 경우의 별도 설정은 [MSSQL 클라우드 배포 안내](docs/deployment-mssql.md)에 보관합니다.
 
 ## 연결 및 포트 설정
 
@@ -80,7 +90,7 @@ DB별 작성 중 SQL, 학습 완료, 저장한 쿼리, 실행 기록 최대 100�
 
 학습 완료는 직접 이해 여부를 표시하는 자기 평가입니다. 자동 정답 채점 기능은 아닙니다.
 
-## SQL 실행 범위
+## 실제 MSSQL 모드의 SQL 실행 범위
 
 - SQL 최대 50,000자, GO 배치 최대 30개. GO 반복 횟수는 지원하지 않습니다.
 - 기본 SQL 실행 예산은 15초입니다. 배치 사이에 시간이 새로 시작되지 않습니다. 취소·시간 초과 후 연결 및 트랜잭션 정리에 짧은 추가 시간이 필요할 수 있습니다.
@@ -138,4 +148,4 @@ SQL 검사는 앱 소유 실습 DB의 데이터를 초기화합니다. 필요한
 
 브라우저 검사는 설치된 Chrome을 사용합니다. Edge를 사용하려면 PowerShell에서 `$env:BROWSER_CHANNEL='msedge'`를 지정합니다. 브라우저 테스트는 별도 브라우저 컨텍스트를 사용하며 사용자의 실제 브라우저 기록은 변경하지 않습니다. 실패 추적 자료는 `tmp/playwright-results`에 저장합니다.
 
-GitHub Actions는 SQL Server가 없어도 가능한 소스 포맷·단위·빌드·렌더링 검사를 실행합니다. 실제 SQL·포트·브라우저 전체 검증은 SQL Server가 준비된 로컬 환경에서 실행합니다.
+GitHub Actions는 소스 포맷·단위·빌드·렌더링 검사와 브라우저 SQL 엔진 검사를 실행합니다. `main`에 push하면 별도 Pages 워크플로가 `npm run build:pages`로 빌드해 공개 사이트를 자동 갱신합니다. 실제 MSSQL·포트·기존 브라우저 전체 검증은 SQL Server가 준비된 로컬 환경에서 실행합니다.

@@ -11,6 +11,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { downloadCsv, downloadJson } from "../../lib/export";
+import { engineLabel, browserSql } from "../../config/runtime";
 export default function QueryResults({ result, running, canceling }) {
   const [tab, setTab] = useState("results"),
     [index, setIndex] = useState(0),
@@ -97,7 +98,7 @@ export default function QueryResults({ result, running, canceling }) {
           <strong>
             {canceling
               ? "실행을 취소하고 연결을 정리하고 있습니다"
-              : "SQL Server에서 실행 중입니다"}
+              : `${engineLabel}에서 실행 중입니다`}
           </strong>
           <p>
             {canceling
@@ -154,8 +155,9 @@ export default function QueryResults({ result, running, canceling }) {
             <pre key={i}>{message}</pre>
           ))}
           <small>
-            각 실행은 독립된 연결입니다. 명시적으로 COMMIT한 변경과 자동 커밋된
-            변경은 DB에 저장됩니다.
+            {browserSql
+              ? "실습 DB는 이 브라우저에 저장됩니다. 끝내지 않은 트랜잭션은 자동으로 롤백합니다. 저장된 변경은 다음 실행에도 유지됩니다."
+              : "각 실행은 독립된 연결입니다. 명시적으로 COMMIT한 변경과 자동 커밋된 변경은 DB에 저장됩니다."}
           </small>
         </div>
       ) : (

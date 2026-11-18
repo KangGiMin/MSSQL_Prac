@@ -3,6 +3,7 @@ import Modal from "../common/Modal";
 import { practiceLabel } from "../database/labels";
 import { workspaceLimits } from "../../../shared/workspace.mjs";
 import { clientUrl } from "../../../shared/runtime.mjs";
+import { browserSql } from "../../config/runtime";
 
 export default function WorkspaceModal({
   modal,
@@ -43,9 +44,16 @@ export default function WorkspaceModal({
             데이터를 다시 채웁니다. 현재 변경 사항은 사라집니다.
           </p>
           <p className="muted">
-            다른 DB와 브라우저에 저장한 쿼리·실행 기록은 유지됩니다. 단, 사용자
-            정의 스키마·타입과 시간 테이블도 정리합니다. 지원 범위를 벗어나는
-            객체의 의존성이 있으면 전체 초기화를 롤백하고 오류를 표시합니다.
+            {browserSql ? (
+              "다른 DB와 이 브라우저에 저장한 쿼리·학습 진행·실행 기록은 유지됩니다."
+            ) : (
+              <>
+                다른 DB와 브라우저에 저장한 쿼리·실행 기록은 유지됩니다. 단,
+                사용자 정의 스키마·타입과 시간 테이블도 정리합니다. 지원 범위를
+                벗어나는 객체의 의존성이 있으면 전체 초기화를 롤백하고 오류를
+                표시합니다.
+              </>
+            )}
           </p>
           <div className="modal-actions">
             <button disabled={resetting} onClick={onClose}>
@@ -106,7 +114,11 @@ export default function WorkspaceModal({
         </>
       ) : (
         <div className="help-content">
-          <p>React와 실제 SQL Server가 연결된 개인용 실습실입니다.</p>
+          <p>
+            {browserSql
+              ? "주소만 열면 바로 사용할 수 있는 SQLite 브라우저 SQL 실습실입니다."
+              : "React와 실제 SQL Server가 연결된 개인용 실습실입니다."}
+          </p>
           <ol>
             <li>
               <strong>DB 선택</strong>
@@ -127,13 +139,24 @@ export default function WorkspaceModal({
               </span>
             </li>
           </ol>
-          <div className="help-setup">
-            <strong>로컬 서버 시작</strong>
-            <pre>npm.cmd ci{"\n"}npm.cmd run dev</pre>
-            <p>
-              {`기본 주소는 ${clientUrl()}입니다. Live Server(5500) 대신 이 주소를 사용하세요. 연결 변경은 .env.example을 .env로 복사한 뒤 SQL_SERVER와 인증 방식을 수정하세요.`}
-            </p>
-          </div>
+          {browserSql ? (
+            <div className="help-setup">
+              <strong>설치와 서버 실행이 필요 없습니다.</strong>
+              <p>
+                데이터를 선택하고 SQL을 실행하세요. 실습 DB는 방문자별로 이
+                브라우저의 IndexedDB에 저장됩니다. SQL Server 전용 문법은 지원
+                안내를 확인하세요.
+              </p>
+            </div>
+          ) : (
+            <div className="help-setup">
+              <strong>로컬 서버 시작</strong>
+              <pre>npm.cmd ci{"\n"}npm.cmd run dev</pre>
+              <p>
+                {`기본 주소는 ${clientUrl()}입니다. Live Server(5500) 대신 이 주소를 사용하세요. 연결 변경은 .env.example을 .env로 복사한 뒤 SQL_SERVER와 인증 방식을 수정하세요.`}
+              </p>
+            </div>
+          )}
           <p className="muted">
             각 실행은 독립 연결입니다. BEGIN TRAN과 COMMIT/ROLLBACK은 한 번에
             실행하세요. 서버 관리 명령과 다른 DB 접근은 제한됩니다. 현재
