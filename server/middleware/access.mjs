@@ -7,6 +7,11 @@ export function createAccessControl(env = process.env) {
   const mode = env.DEPLOYMENT_MODE || "local";
   if (!["local", "hosted"].includes(mode))
     throw new Error("DEPLOYMENT_MODE는 local 또는 hosted여야 합니다.");
+  const access = env.APP_ACCESS || "private";
+  if (!["private", "public"].includes(access))
+    throw new Error("APP_ACCESS는 private 또는 public이어야 합니다.");
+  if (access === "public" && mode !== "hosted")
+    throw new Error("공개 접속은 DEPLOYMENT_MODE=hosted에서만 허용합니다.");
 
   let allowedOrigin, credentials;
   if (mode === "hosted") {
@@ -25,17 +30,19 @@ export function createAccessControl(env = process.env) {
         "배포 주소를 PUBLIC_ORIGIN에 https://도메인 형태로 지정하세요.",
       );
     if (
-      !env.APP_USER ||
-      /[:\s]/.test(env.APP_USER) ||
-      !env.APP_PASSWORD ||
-      env.APP_PASSWORD.length < 16 ||
-      /[\r\n]/.test(env.APP_PASSWORD)
+      access === "private" &&
+      (!env.APP_USER ||
+        /[:\s]/.test(env.APP_USER) ||
+        !env.APP_PASSWORD ||
+        env.APP_PASSWORD.length < 16 ||
+        /[\r\n]/.test(env.APP_PASSWORD))
     )
       throw new Error(
         "배포에는 APP_USER와 16자 이상의 APP_PASSWORD가 필요합니다.",
       );
     allowedOrigin = url.origin;
-    credentials = digest(`${env.APP_USER}:${env.APP_PASSWORD}`);
+    if (access === "private")
+      credentials = digest(`${env.APP_USER}:${env.APP_PASSWORD}`);
   }
 
   return (req, res, next) => {
@@ -65,6 +72,16 @@ export function createAccessControl(env = process.env) {
       // The deployment exposes this process only through its managed HTTPS proxy.
       if (!req.secure && req.get("x-forwarded-proto") !== "https")
         return res.status(403).json({ error: "HTTPS 주소로 접속해 주세요." });
+      if (access === "public") {
+        if (/^\/api\/setup\/?$/i.test(req.path))
+          return res.status(403).json({
+            error: "공개 사이트의 DB 준비는 서버 시작 과정에서 관리합니다.",
+          });
+        res.locals.publicWorkspace = true;
+        if (/^\/api(?:\/|$)/i.test(req.path))
+          res.set("Cache-Control", "no-store");
+        return next();
+      }
       const match = /^Basic ([A-Za-z0-9+/]+={0,2})$/i.exec(
         req.get("authorization") || "",
       );

@@ -548,8 +548,9 @@ export default function App() {
                 <div className="workbench-footnote">
                   <span>
                     <Info size={13} />
-                    실제 Microsoft SQL Server에서 실행합니다. 변경 사항은 DB에
-                    반영되며, DB 초기화로 복원할 수 있어요.
+                    {health?.publicWorkspace
+                      ? "공용 MSSQL 실습 DB입니다. 수정·삭제·초기화는 다른 방문자에게도 반영됩니다. 작성한 SQL과 학습 기록은 이 브라우저에 저장됩니다."
+                      : "실제 Microsoft SQL Server에서 실행합니다. 변경 사항은 DB에 반영되며, DB 초기화로 복원할 수 있어요."}
                   </span>
                 </div>
               </section>

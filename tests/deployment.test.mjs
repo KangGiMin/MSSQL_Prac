@@ -155,6 +155,63 @@ test("only the exact read-only liveness route bypasses hosted authentication", a
   );
 });
 
+test("public hosting accepts anonymous HTTPS visitors and protects setup and request origins", async (t) => {
+  const base = await server(t, {
+    DEPLOYMENT_MODE: "hosted",
+    APP_ACCESS: "public",
+    PUBLIC_ORIGIN: hosted.PUBLIC_ORIGIN,
+  });
+  const headers = { "X-Forwarded-Proto": "https" };
+  for (const path of [
+    "/",
+    "/assets/main.js",
+    "/api/health",
+    "/materials/sql-reference.pdf",
+  ]) {
+    assert.equal((await fetch(base + path)).status, 403);
+    const response = await fetch(base + path, { headers });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("www-authenticate"), null);
+  }
+  assert.equal(
+    (
+      await fetch(base + "/api/query", {
+        method: "POST",
+        headers: { ...headers, Origin: hosted.PUBLIC_ORIGIN },
+      })
+    ).status,
+    200,
+  );
+  assert.equal(
+    (
+      await fetch(base + "/api/query", {
+        method: "POST",
+        headers: { ...headers, Origin: "https://untrusted.example" },
+      })
+    ).status,
+    403,
+  );
+  for (const path of ["/api/setup", "/api/setup/", "/API/SETUP", "/api/Setup/"])
+    assert.equal(
+      (await fetch(base + path, { method: "POST", headers })).status,
+      403,
+    );
+});
+
+test("public hosting must be explicit and cannot enable public local access", () => {
+  assert.throws(() => createAccessControl({ APP_ACCESS: "public" }));
+  assert.throws(() =>
+    createAccessControl({ ...hosted, APP_ACCESS: "invalid" }),
+  );
+  assert.throws(() =>
+    createAccessControl({
+      DEPLOYMENT_MODE: "hosted",
+      APP_ACCESS: "public",
+      PUBLIC_ORIGIN: "http://practice.example",
+    }),
+  );
+});
+
 function pool(markers, objects = []) {
   const calls = [];
   return {

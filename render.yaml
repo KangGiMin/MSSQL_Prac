@@ -6,9 +6,13 @@ services:
     dockerfilePath: ./Dockerfile
     healthCheckPath: /healthz
     autoDeployTrigger: off
+    repo: https://github.com/KangGiMin/MSSQL_Prac
+    branch: main
     envVars:
       - key: DEPLOYMENT_MODE
         value: hosted
+      - key: APP_ACCESS
+        value: public
       - key: SQL_PLATFORM
         value: azure
       - key: SQL_AUTH
@@ -23,7 +27,3 @@ services:
         sync: false
       - key: SQL_PASSWORD
         sync: false
-      - key: APP_USER
-        value: queryground
-      - key: APP_PASSWORD
-        generateValue: true

@@ -2,6 +2,16 @@
 
 이 구성은 개인 PC와 VS Code를 꺼도 실행되도록 웹/API를 Render Free에, 실습 DB 3개를 Azure SQL Database 무료 요금제에 둡니다. 현재 저장소에는 배포 설정이 준비되어 있으며, 실제 리소스 생성과 외부 접속 검증은 계정 연결 후 진행해야 합니다.
 
+웹 화면·API를 같은 Render HTTPS 주소에서 제공하므로 방문자는 그 주소만 클릭하면 됩니다. PC의 개발 서버·SQL Server·VS Code 실행 여부와 관계없이 외부 리소스에서 동작합니다. GitHub Pages의 예전 게시 화면은 이 MSSQL 웹/API 배포와 별개입니다.
+
+[이 저장소로 Render Blueprint 준비하기](https://dashboard.render.com/blueprint/new?repo=https%3A%2F%2Fgithub.com%2FKangGiMin%2FMSSQL_Prac)
+
+## 공개 접속 설정
+
+`render.yaml`은 `DEPLOYMENT_MODE=hosted`, `APP_ACCESS=public`을 지정합니다. 방문자는 로그인·설치·터미널 실행 없이 접속합니다. HTTPS·요청 출처·실습 DB 권한 제한은 유지하고, 방문자의 `/api/setup` 호출은 차단합니다. DB 준비는 서버 시작 과정에서 수행합니다.
+
+실습 DB 3개는 공용입니다. 한 방문자의 수정·삭제·초기화가 다른 방문자에게도 보입니다. 작성 SQL·진행도·기록은 각 브라우저에 저장됩니다. 비공개 운영이 필요하면 `APP_ACCESS=private`, `APP_USER`, 16자 이상의 `APP_PASSWORD`를 지정합니다. 기본 접근 정책은 private이며 로컬은 계속 루프백 접속만 허용합니다.
+
 ## 필요한 계정과 무료 서비스의 범위
 
 - Render 계정과 활성화된 Azure 구독이 필요합니다. Microsoft 계정 로그인과 Azure 구독 활성화는 별개입니다.
@@ -40,18 +50,17 @@ az deployment group what-if \
 | `SQL_SERVER`   | `YOUR_SQL_SERVER.database.windows.net`   |
 | `SQL_USER`     | 논리 서버의 SQL 관리자 계정              |
 | `SQL_PASSWORD` | 해당 계정의 비밀번호, 비밀 값으로 입력   |
-| `APP_USER`     | 브라우저 접속 계정. 기본값 `queryground` |
-| `APP_PASSWORD` | 자동 생성되는 브라우저 접속 비밀번호     |
+| `APP_ACCESS`   | `public`: 방문자 로그인 없이 접속 |
 
 나머지 설정은 Blueprint에서 지정합니다. Render의 기본 주소는 `RENDER_EXTERNAL_URL`로 읽습니다. 별도 도메인을 사용하면 `PUBLIC_ORIGIN=https://실제도메인`을 지정합니다. 비밀번호와 `.env`는 Docker 이미지나 Git에 포함되지 않습니다.
 
-Docker 이미지에는 React 빌드, API, 실습 초기 데이터, 교재 파일이 포함됩니다. 시작할 때 새 전용 DB만 준비하며 기존 준비된 DB의 내용은 보존합니다. 외부 접속은 HTTPS와 브라우저 기본 로그인으로 보호합니다. 학습 진행·작성 SQL·실행 기록은 기존과 같이 브라우저 저장소를 사용합니다.
+Docker 이미지에는 React 빌드, API, 실습 초기 데이터, 교재 파일이 포함됩니다. 시작할 때 새 전용 DB만 준비하며 기존 준비된 DB의 내용은 보존합니다. 외부 접속은 HTTPS로 제공하며 기본 공개 설정에서는 로그인이 필요 없습니다. 학습 진행·작성 SQL·실행 기록은 브라우저 저장소를 사용합니다.
 
-로그인 비밀번호는 Render 환경 변수에서 확인합니다. 기본 상태 검사 `/healthz`에는 DB·사용자 정보가 없고, SQL API와 정적 파일·교재는 로그인이 필요합니다.
+기본 상태 검사 `/healthz`에는 DB·사용자 정보가 없습니다. DB 연결은 `/api/health`에서 `ok: true`, `engine: Microsoft SQL Server`와 DB 3개의 정상 상태를 확인합니다. 비공개 모드에서는 SQL API와 정적 파일·교재에 로그인이 필요합니다.
 
 ## 접속 확인과 기존 작업 이동
 
-배포 성공 후 실제 발급된 HTTPS 주소에서 로그인하고, 세 데이터 선택·스키마 조회·SELECT 실행·취소·저장·교재 열기를 확인합니다. Azure 실습 DB의 DDL·DML·초기화 검사는 클라우드에 만든 전용 DB에서만 진행합니다.
+배포 성공 후 실제 발급된 HTTPS 주소에서 로그인 없이 세 데이터 선택·스키마 조회·SELECT 실행·취소·저장·교재 열기를 확인합니다. Azure 실습 DB의 DDL·DML·초기화 검사는 클라우드에 만든 전용 DB에서만 진행합니다. 확인된 주소를 README에 대표 접속 주소로 등록합니다.
 
 로컬 주소와 배포 주소는 브라우저 저장소가 다릅니다. 로컬의 **전체 백업**을 내보내 배포 주소에서 **백업 복원**으로 가져옵니다. 이 백업은 작성한 SQL·진행·기록을 옮기며 SQL Server 테이블 데이터 자체를 복사하지 않습니다. 클라우드 DB는 기본 실습 데이터로 별도 시작하고, 로컬 실습 DB는 유지합니다.
 

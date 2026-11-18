@@ -2,6 +2,10 @@
 
 React + Vite, Express API와 실제 Microsoft SQL Server를 연결한 Windows 개인용 SQL 학습 앱입니다. SQL을 흉내 내는 실행기가 아니라 SQL Server에서 SELECT·DML·DDL·트랜잭션·프로시저를 실행합니다.
 
+PC와 VS Code를 꺼도 접속·쿼리 실행이 가능하도록 웹 화면과 API를 외부 Render 서버에, 실습 DB 3개를 Azure SQL에 두는 배포 구성을 제공합니다. `render.yaml`은 방문자 로그인 없이 사용하는 공개 모드입니다. 실제 외부 서비스 생성은 운영자 계정 연결과 DB 준비가 필요하며, **현재 외부 MSSQL 배포 완료 상태는 아닙니다.**
+
+[배포 설정 열기](https://dashboard.render.com/blueprint/new?repo=https%3A%2F%2Fgithub.com%2FKangGiMin%2FMSSQL_Prac) · [계정·DB·배포 안내](docs/deployment.md)
+
 ## 실행 준비
 
 - Node.js 24 이상
